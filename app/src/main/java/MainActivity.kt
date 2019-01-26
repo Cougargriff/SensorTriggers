@@ -3,7 +3,13 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.content.Intent
+import android.content.Context
+import android.support.v4.content.ContextCompat
+import android.widget.Toast
+import com.google.firebase.FirebaseApp
 import co.revely.gradient.RevelyGradient
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_login_full.view.*
 
@@ -11,13 +17,15 @@ class MainActivity : AppCompatActivity()
 {
     data class User(var email : String, var password : String)
 
+
+
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_full)
 
-
-
+        FirebaseApp.initializeApp(this.applicationContext)
 
         RevelyGradient
                 .linear()
@@ -40,7 +48,7 @@ class MainActivity : AppCompatActivity()
             {
                 lpacket.password = pass_box.text.toString()
             }
-
+            Toast.makeText(this, "Logging in...", Toast.LENGTH_LONG)
             login_dispatch(lpacket)
         }
 
@@ -54,8 +62,11 @@ class MainActivity : AppCompatActivity()
     fun login_dispatch(user : User)
     {
         var handler = LoginHandler(user)
+//        handler.initialize()
+//        handler.login()
 
-        handler.initialize()
+        handler.temp_login(this)
+
 
 
     }
