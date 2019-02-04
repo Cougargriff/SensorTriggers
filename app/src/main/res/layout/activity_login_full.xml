@@ -95,7 +95,7 @@
                 android:layout_marginBottom="74dp"
                 android:clickable="true"
                 android:src="@drawable/electricalsensor"
-                app:backgroundTint="@color/login_color"
+                app:backgroundTint="@color/blueish"
                 app:elevation="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
