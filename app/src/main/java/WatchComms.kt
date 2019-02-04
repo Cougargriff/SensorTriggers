@@ -11,6 +11,7 @@ import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import co.revely.gradient.RevelyGradient
 import com.garmin.android.connectiq.ConnectIQ
+import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
 import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_watch_comms.*
@@ -22,6 +23,11 @@ class WatchComms : AppCompatActivity()
     lateinit var available : IQDevice
     lateinit var paired : List<IQDevice>
 
+    lateinit var app : IQApp
+
+
+    var CONSOLE_STRING = ""
+
 
 
 
@@ -30,16 +36,15 @@ class WatchComms : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_watch_comms)
 
-        val valueAnimator = setupGradient(comms_view)
+//        val valueAnimator = setupGradient(comms_view)
 
-
+        initialize()
 
 
         comms_button.setOnClickListener {
-            if(!valueAnimator.isRunning)
-                valueAnimator.start()
+//            if(!valueAnimator.isRunning)
+//                valueAnimator.start()
 
-            initialize()
             Toast.makeText(this,"connection request...", Toast.LENGTH_SHORT)
         }
     }
@@ -66,23 +71,40 @@ class WatchComms : AppCompatActivity()
 
     fun initialize()
     {
+
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
 
 
 
         connectiq.initialize(this, true, connectListener())
 
-        if(!checkDevices())
-        {
-            Log.i("ConnectIQ", "Couldn't find connected device.")
-        }
-
-        // have available device
-        // TODO : get garmin watch app id to register for app events (i.e. onMessageRecieved)
-
 
 
     }
+
+    fun initializeRest()
+    {
+        if(!checkDevices())
+        {
+            Log.i("ConnectIQ", "Couldn't find connected device.")
+            Toast.makeText(this, "NO DEVICE FOUND", Toast.LENGTH_SHORT);
+        }
+        else
+        {
+            Toast.makeText(this, "FOUND AVAILABLE DEVICE", Toast.LENGTH_LONG);
+        }
+
+        getAppInstance()
+
+
+    }
+
+    fun getAppInstance()
+    {
+        var iqApp = connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
+    }
+
+
 
     fun checkDevices() : Boolean
     {
@@ -102,7 +124,36 @@ class WatchComms : AppCompatActivity()
         return false
     }
 
+
+
     // Listener Interfaces
+
+
+    fun appEventListener() : ConnectIQ.IQApplicationEventListener =
+            object : ConnectIQ.IQApplicationEventListener {
+                override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?) {
+                    if(p3 == ConnectIQ.IQMessageStatus.SUCCESS)
+                    {
+                        CONSOLE_STRING += "Current Heart Rate : " + p2!![0] + "\n"
+                        console.text = CONSOLE_STRING
+                    }
+                }
+            }
+
+
+    fun appListener() : ConnectIQ.IQApplicationInfoListener =
+            object : ConnectIQ.IQApplicationInfoListener {
+                override fun onApplicationInfoReceived(p0: IQApp?) {
+                    app = p0!!
+
+                    connectiq.registerForAppEvents(available, app, appEventListener())
+
+                }
+
+                override fun onApplicationNotInstalled(p0: String?) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+            }
 
     fun deviceListener() : ConnectIQ.IQDeviceEventListener =
             object : ConnectIQ.IQDeviceEventListener {
@@ -110,10 +161,10 @@ class WatchComms : AppCompatActivity()
                 {
                     // handle new device status
                     // statuses -> CONNECTED, NOT_CONNECTED, NOT_PAIRED
-
-
                 }
             }
+
+
 
     fun connectListener() : ConnectIQ.ConnectIQListener =
             object : ConnectIQ.ConnectIQListener {
@@ -126,7 +177,7 @@ class WatchComms : AppCompatActivity()
 
                 override fun onSdkReady()
                 {
-                    // Do any post initialization setup.
+                    initializeRest()
                 }
 
                 override fun onSdkShutDown()
@@ -135,6 +186,8 @@ class WatchComms : AppCompatActivity()
                 }
 
             }
+
+
 }
 
 

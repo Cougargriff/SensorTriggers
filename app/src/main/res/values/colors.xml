@@ -6,4 +6,6 @@
     <color name="login_color">#FFFFFF</color>
 
     <color name="black_overlay">#66000000</color>
+
+    <color name="blueish">#4158D0</color>
 </resources>
