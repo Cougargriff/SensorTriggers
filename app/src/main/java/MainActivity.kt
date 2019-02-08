@@ -52,11 +52,6 @@ class MainActivity : AppCompatActivity()
             login_dispatch(lpacket)
         }
 
-
-
-
-
-
     }
 
     fun login_dispatch(user : User)
