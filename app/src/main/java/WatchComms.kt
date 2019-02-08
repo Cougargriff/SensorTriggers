@@ -2,6 +2,7 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.graphics.Color
+import android.opengl.Visibility
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -35,6 +36,7 @@ class WatchComms : AppCompatActivity()
 
 
     var CONSOLE_STRING = ""
+    var status = "OFF"
 
 
 
@@ -52,9 +54,19 @@ class WatchComms : AppCompatActivity()
             initialize()
         }
 
+        transmit_button.setOnClickListener {
+
+            transmit("ON")
+        }
 
 
 
+    }
+
+    fun transmit(status : String)
+    {
+
+        connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
 
     fun initialize()
@@ -124,6 +136,14 @@ class WatchComms : AppCompatActivity()
                 }
             }
 
+    fun sendMessageCallback() : ConnectIQ.IQSendMessageListener =
+            object : ConnectIQ.IQSendMessageListener
+            {
+                override fun onMessageStatus(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQMessageStatus?) {
+
+                }
+            }
+
 
 
     fun appListener() : ConnectIQ.IQApplicationInfoListener =
@@ -133,13 +153,13 @@ class WatchComms : AppCompatActivity()
                 {
                     app = p0!!
 
-                    connectiq.openApplication(available, app, openListener())
-
+                    //connectiq.openApplication(available, app, openListener())
 
 
                     connectiq.registerForAppEvents(available, app, appEventListener())
 
-
+                    console.visibility = View.VISIBLE
+                    transmit_button.visibility = View.VISIBLE
 
                 }
 
@@ -154,7 +174,6 @@ class WatchComms : AppCompatActivity()
             {
                 override fun onOpenApplicationResponse(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQOpenApplicationStatus?)
                 {
-                    toast(p2.toString())
                 }
             }
 

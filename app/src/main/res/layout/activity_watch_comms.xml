@@ -55,31 +55,37 @@
         android:layout_marginStart="56dp"
         android:layout_marginTop="49dp"
         android:layout_marginEnd="57dp"
-        android:layout_marginBottom="321dp"
+        android:layout_marginBottom="93dp"
         android:background="@color/login_color"
         android:contentDescription="Console"
         android:textColor="@color/black"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/transmit_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/comms_button" />
 
-    <Switch
-        android:id="@+id/transmit_toggle"
-        android:layout_width="150dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="120dp"
-        android:layout_marginTop="75dp"
-        android:layout_marginEnd="141dp"
-        android:layout_marginBottom="160dp"
-        android:text=" Transmit OFF"
+    <Button
+        android:id="@+id/transmit_button"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="153dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="129dp"
+        android:layout_marginTop="93dp"
+        android:layout_marginEnd="129dp"
+        android:layout_marginBottom="135dp"
+        android:background="@color/login_color"
+        android:backgroundTint="@color/login_color"
+        android:backgroundTintMode="add"
+        android:text="Request HR"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        android:textColor="@color/black"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/console" />
+        app:layout_constraintTop_toBottomOf="@+id/console"
+        app:layout_constraintVertical_bias="0.0" />
 
 
 </android.support.constraint.ConstraintLayout>
