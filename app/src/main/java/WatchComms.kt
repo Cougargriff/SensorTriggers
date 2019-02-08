@@ -2,9 +2,11 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.graphics.Color
+import android.opengl.Visibility
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.support.design.widget.Snackbar
 import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -15,6 +17,13 @@ import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
 import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_watch_comms.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
+
 
 class WatchComms : AppCompatActivity()
 {
@@ -27,6 +36,7 @@ class WatchComms : AppCompatActivity()
 
 
     var CONSOLE_STRING = ""
+    var status = "OFF"
 
 
 
@@ -35,51 +45,34 @@ class WatchComms : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_watch_comms)
-
-//        val valueAnimator = setupGradient(comms_view)
-
-        initialize()
+        comms_view.setBackgroundColor(resources.getColor(R.color.blueish))
 
 
         comms_button.setOnClickListener {
-//            if(!valueAnimator.isRunning)
-//                valueAnimator.start()
 
-            Toast.makeText(this,"connection request...", Toast.LENGTH_SHORT)
+            comms_view.longSnackbar("Initializing connectIQ connection. . .")
+            initialize()
         }
+
+        transmit_button.setOnClickListener {
+
+            transmit("ON")
+        }
+
+
+
     }
 
-    fun setupGradient(view : View) : ValueAnimator
+    fun transmit(status : String)
     {
-        val color1 = Color.parseColor("#00c6ff")
-        val color2 = Color.parseColor("#ff72ff")
 
-        val valueAnimator = ValueAnimator.ofFloat(0f, 360f)
-        valueAnimator.duration = 15000
-        valueAnimator.repeatCount = ValueAnimator.INFINITE
-        valueAnimator.interpolator = LinearInterpolator()
-        RevelyGradient.sweep()
-                .colors(intArrayOf(color1, color2, color1))
-                .animate(valueAnimator, { _valueAnimator, _gradientDrawable ->
-                    _gradientDrawable.angle = _valueAnimator.animatedValue as Float
-                })
-                .onBackgroundOf(comms_view)
-
-        return valueAnimator
+        connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
-
 
     fun initialize()
     {
-
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
-
-
-
         connectiq.initialize(this, true, connectListener())
-
-
-
     }
 
     fun initializeRest()
@@ -101,7 +94,8 @@ class WatchComms : AppCompatActivity()
 
     fun getAppInstance()
     {
-        var iqApp = connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
+        // app is initialized in callback appListener()
+        connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
     }
 
 
@@ -130,8 +124,10 @@ class WatchComms : AppCompatActivity()
 
 
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
-            object : ConnectIQ.IQApplicationEventListener {
-                override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?) {
+            object : ConnectIQ.IQApplicationEventListener
+            {
+                override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?)
+                {
                     if(p3 == ConnectIQ.IQMessageStatus.SUCCESS)
                     {
                         CONSOLE_STRING += "Current Heart Rate : " + p2!![0] + "\n"
@@ -140,23 +136,50 @@ class WatchComms : AppCompatActivity()
                 }
             }
 
+    fun sendMessageCallback() : ConnectIQ.IQSendMessageListener =
+            object : ConnectIQ.IQSendMessageListener
+            {
+                override fun onMessageStatus(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQMessageStatus?) {
+
+                }
+            }
+
+
 
     fun appListener() : ConnectIQ.IQApplicationInfoListener =
-            object : ConnectIQ.IQApplicationInfoListener {
-                override fun onApplicationInfoReceived(p0: IQApp?) {
+            object : ConnectIQ.IQApplicationInfoListener
+            {
+                override fun onApplicationInfoReceived(p0: IQApp?)
+                {
                     app = p0!!
+
+                    //connectiq.openApplication(available, app, openListener())
+
 
                     connectiq.registerForAppEvents(available, app, appEventListener())
 
+                    console.visibility = View.VISIBLE
+                    transmit_button.visibility = View.VISIBLE
+
                 }
 
-                override fun onApplicationNotInstalled(p0: String?) {
+                override fun onApplicationNotInstalled(p0: String?)
+                {
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
             }
 
+    fun openListener() : ConnectIQ.IQOpenApplicationListener =
+            object : ConnectIQ.IQOpenApplicationListener
+            {
+                override fun onOpenApplicationResponse(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQOpenApplicationStatus?)
+                {
+                }
+            }
+
     fun deviceListener() : ConnectIQ.IQDeviceEventListener =
-            object : ConnectIQ.IQDeviceEventListener {
+            object : ConnectIQ.IQDeviceEventListener
+            {
                 override fun onDeviceStatusChanged(p0: IQDevice?, p1: IQDevice.IQDeviceStatus?)
                 {
                     // handle new device status
@@ -167,12 +190,14 @@ class WatchComms : AppCompatActivity()
 
 
     fun connectListener() : ConnectIQ.ConnectIQListener =
-            object : ConnectIQ.ConnectIQListener {
+            object : ConnectIQ.ConnectIQListener
+            {
                 override fun onInitializeError(p0: ConnectIQ.IQSdkErrorStatus?)
                 {
                     // A failure has occurred during initialization.  Inspect
                     // the IQSdkErrorStatus value for more information regarding
                     // the failure.
+                    toast("ERROR establishing connection")
                 }
 
                 override fun onSdkReady()
