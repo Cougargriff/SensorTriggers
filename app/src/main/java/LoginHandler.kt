@@ -10,41 +10,45 @@ import com.google.android.gms.tasks.OnCompleteListener
 import android.R.attr.password
 import android.content.Context
 import android.content.Intent
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.ContextCompat.startActivity
 import android.util.Log
 import com.google.firebase.FirebaseApp
+import org.jetbrains.anko.makeCall
 
 
-class LoginHandler(lPacket : MainActivity.User)
+class LoginHandler(lPacket : MainActivity.User, context: Context)
 {
-    lateinit var mAuth : FirebaseAuth
+    var mAuth  = FirebaseAuth.getInstance()
 
     var email = lPacket.email
     var psw = lPacket.password
+    var context = context
 
-    fun initialize()
-    {
 
-        mAuth = FirebaseAuth.getInstance()
-    }
-
-    fun temp_login(context: Context)
+    fun transition()
     {
         val intent = Intent(context, WatchComms::class.java)
-        startActivity(context, intent,null)
+        ContextCompat.startActivity(context, intent, null)
     }
 
     fun login()
     {
-        mAuth.signInWithEmailAndPassword(email, psw).addOnSuccessListener {
-            Log.i("mAUTH", "Login Success")
+        mAuth.signInWithEmailAndPassword(email, psw).addOnCompleteListener {
+            if(it.isSuccessful)
+            {
+                // go to new screen
+                transition()
+            }
         }
     }
 
-    fun register()
+    fun register() : Boolean
     {
-        mAuth.createUserWithEmailAndPassword(email, psw).addOnSuccessListener {
+        var result = mAuth.createUserWithEmailAndPassword(email, psw).addOnSuccessListener {
             Log.i("mAuth", "Register User Success - email : " + email + ", psw : " + psw)
         }
+
+        return result.isSuccessful
     }
 }

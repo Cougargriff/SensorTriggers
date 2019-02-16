@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
 import android.view.animation.LinearInterpolator
@@ -47,10 +48,12 @@ class WatchComms : AppCompatActivity()
         setContentView(R.layout.activity_watch_comms)
         comms_view.setBackgroundColor(resources.getColor(R.color.blueish))
 
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+
 
         comms_button.setOnClickListener {
 
-            comms_view.longSnackbar("Initializing connectIQ connection. . .")
             initialize()
         }
 
@@ -121,8 +124,6 @@ class WatchComms : AppCompatActivity()
 
 
     // Listener Interfaces
-
-
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
             object : ConnectIQ.IQApplicationEventListener
             {

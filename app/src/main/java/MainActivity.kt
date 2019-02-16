@@ -6,17 +6,18 @@ import android.os.Bundle
 import android.content.Intent
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import co.revely.gradient.RevelyGradient
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_login_full.view.*
+import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : AppCompatActivity()
 {
     data class User(var email : String, var password : String)
-
 
 
 
@@ -25,7 +26,14 @@ class MainActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_full)
 
-        FirebaseApp.initializeApp(this.applicationContext)
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
+        window.statusBarColor = Color.parseColor("#4158D0")
+
+        FirebaseApp.getInstance()
+        FirebaseApp.initializeApp(applicationContext)
+
+
 
         RevelyGradient
                 .linear()
@@ -34,9 +42,8 @@ class MainActivity : AppCompatActivity()
                 .onBackgroundOf(view)
 
 
-        // Login Button Callback Closure
-
         loginButton.setOnClickListener {
+
             var lpacket = User(email = "", password = "")
 
             if(email_box.text.toString().compareTo("") != 0)
@@ -49,21 +56,24 @@ class MainActivity : AppCompatActivity()
                 lpacket.password = pass_box.text.toString()
             }
             Toast.makeText(this, "Logging in...", Toast.LENGTH_LONG)
-            login_dispatch(lpacket)
+
+
+
+            val auth = login_dispatch(lpacket)
+            auth.login()
+
+
+
         }
 
     }
 
-    fun login_dispatch(user : User)
+
+
+
+    fun login_dispatch(user : User) : LoginHandler
     {
-        var handler = LoginHandler(user)
-//        handler.initialize()
-//        handler.login()
-
-        handler.temp_login(this)
-
-
-
+        return LoginHandler(user, this)
     }
 
 

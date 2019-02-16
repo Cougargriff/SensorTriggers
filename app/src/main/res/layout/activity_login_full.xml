@@ -40,17 +40,16 @@
             <TextView
                 android:id="@+id/title"
                 android:layout_width="284dp"
-                android:layout_height="42dp"
+                android:layout_height="57dp"
                 android:layout_marginStart="38dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="9dp"
                 android:text="Sensor Triggers"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
                 android:textSize="36sp"
                 app:layout_constraintBottom_toTopOf="@+id/email_box"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <EditText
                 android:id="@+id/email_box"
@@ -62,6 +61,7 @@
                 android:ems="10"
                 android:hint="E-mail"
                 android:inputType="textEmailAddress"
+                android:text="cougargriff@gmail.com"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
                 android:textColorHighlight="@color/login_color"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -100,7 +100,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/pass_box"
-                app:rippleColor="@color/design_default_color_primary_dark" />
+                app:rippleColor="@color/design_default_color_primary_dark"
+                app:showMotionSpec="@android:anim/fade_in" />
 
         </android.support.constraint.ConstraintLayout>
 
