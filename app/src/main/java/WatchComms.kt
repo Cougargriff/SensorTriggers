@@ -39,6 +39,7 @@ class WatchComms : AppCompatActivity()
     var CONSOLE_STRING = ""
     var status = "OFF"
 
+    var HR_DATA = ArrayList<Int>()
 
 
 
@@ -58,8 +59,11 @@ class WatchComms : AppCompatActivity()
         }
 
         transmit_button.setOnClickListener {
-
-            transmit("ON")
+            when (status)
+            {
+                "OFF" -> transmit("ON")
+                "ON" -> transmit("OFF")
+            }
         }
 
 
@@ -158,6 +162,7 @@ class WatchComms : AppCompatActivity()
 
 
                     connectiq.registerForAppEvents(available, app, appEventListener())
+
 
                     console.visibility = View.VISIBLE
                     transmit_button.visibility = View.VISIBLE
