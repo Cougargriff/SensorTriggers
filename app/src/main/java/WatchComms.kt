@@ -66,13 +66,23 @@ class WatchComms : AppCompatActivity()
             }
         }
 
+        test_button.setOnClickListener {
+            transmit_test("test")
+        }
+
+
+
 
 
     }
 
     fun transmit(status : String)
     {
-
+        this.status = status
+        connectiq.sendMessage(available, app, status, sendMessageCallback())
+    }
+    fun transmit_test(status : String)
+    {
         connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
 
@@ -135,7 +145,8 @@ class WatchComms : AppCompatActivity()
                 {
                     if(p3 == ConnectIQ.IQMessageStatus.SUCCESS)
                     {
-                        CONSOLE_STRING += "Current Heart Rate : " + p2!![0] + "\n"
+                        HR_DATA.addAll(p2!![0] as List<Int>)
+                        CONSOLE_STRING = "Current Heart Rate : " + HR_DATA.toString() + "\n"
                         console.text = CONSOLE_STRING
                     }
                 }
@@ -166,6 +177,7 @@ class WatchComms : AppCompatActivity()
 
                     console.visibility = View.VISIBLE
                     transmit_button.visibility = View.VISIBLE
+                    test_button.visibility = View.VISIBLE
 
                 }
 
