@@ -52,18 +52,7 @@ class WatchComms : AppCompatActivity()
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
 
-
-        db.collection("users")
-                .add(HR_DATA)
-                .addOnSuccessListener {
-                    Log.d("db", "DocumentSnapshot added with ID: " + it.id)
-                }
-                .addOnFailureListener {
-                    Log.d("db error", "error adding document")
-                }
-
-
-
+        
         var sample = hashMapOf(85675 to 67, 85679 to 74, 85686 to 80, 85690 to 79, 85696 to 84, 85699 to 70)
         chartView = findViewById<LineChartView>(R.id.chartView)
 
