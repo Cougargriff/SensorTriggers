@@ -66,6 +66,26 @@ class MainActivity : AppCompatActivity()
 
         }
 
+        register_fab.setOnClickListener {
+            var lpacket = User(email = "", password = "")
+
+            if(email_box.text.toString().compareTo("") != 0)
+            {
+                lpacket.email = email_box.text.toString()
+            }
+
+            if(pass_box.text.toString().compareTo("") != 0)
+            {
+                lpacket.password = pass_box.text.toString()
+            }
+            Toast.makeText(this, "Logging in...", Toast.LENGTH_LONG)
+
+
+
+            val auth = login_dispatch(lpacket)
+            auth.register()
+        }
+
     }
 
 
