@@ -1,22 +1,31 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
+import android.animation.ObjectAnimator
+import android.animation.TimeInterpolator
+import android.animation.ValueAnimator
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
+import co.revely.gradient.RevelyGradient
 import com.db.chart.model.LineSet
 import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.FirebaseUserMetadata
 import com.google.firebase.firestore.FirebaseFirestore
+
+import kotlinx.android.synthetic.main.activity_login_full.*
+
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
 import java.util.*
@@ -52,12 +61,28 @@ class WatchComms : AppCompatActivity()
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
 
+
         
         var sample = hashMapOf(85675 to 67, 85679 to 74, 85686 to 80, 85690 to 79, 85696 to 84, 85699 to 70)
         chartView = findViewById<LineChartView>(R.id.chartView)
 
 
-        updateChart(sample, chartView)
+        val valueanimator = ValueAnimator.ofFloat(-400f, 200f)
+        valueanimator.addUpdateListener {
+            val value = it.animatedValue as Float
+
+            comms_button.translationX = value
+
+        }
+        valueanimator.interpolator = AccelerateInterpolator()
+
+        valueanimator.setDuration(750L)
+
+        valueanimator.start()
+
+
+
+        chartView = findViewById<LineChartView>(R.id.chartView)
 
 
 
@@ -80,8 +105,6 @@ class WatchComms : AppCompatActivity()
 
             transmit_test("sync")
         }
-
-
 
     }
 
@@ -227,6 +250,8 @@ class WatchComms : AppCompatActivity()
                     console_label.visibility = View.VISIBLE
                     console.visibility = View.VISIBLE
                     transmit_button.visibility = View.VISIBLE
+                    chartBase.visibility = View.VISIBLE
+                    chartView.visibility = View.VISIBLE
                     test_button.visibility = View.VISIBLE
 
                 }
