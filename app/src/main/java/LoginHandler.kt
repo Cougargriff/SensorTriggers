@@ -43,12 +43,16 @@ class LoginHandler(lPacket : MainActivity.User, context: Context)
         }
     }
 
-    fun register() : Boolean
+    fun register()
     {
-        var result = mAuth.createUserWithEmailAndPassword(email, psw).addOnSuccessListener {
-            Log.i("mAuth", "Register User Success - email : " + email + ", psw : " + psw)
+        mAuth.createUserWithEmailAndPassword(email, psw).addOnCompleteListener {
+
+            if(it.isSuccessful)
+            {
+                // go to new screen
+                transition()
+            }
         }
 
-        return result.isSuccessful
     }
 }

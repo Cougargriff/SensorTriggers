@@ -49,27 +49,7 @@ class WatchComms : AppCompatActivity()
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
 
-
-
-
-        val valueanimator = ValueAnimator.ofFloat(-400f, 200f)
-        valueanimator.addUpdateListener {
-            val value = it.animatedValue as Float
-
-            comms_button.translationX = value
-
-        }
-        valueanimator.interpolator = AccelerateInterpolator()
-
-        valueanimator.setDuration(750L)
-
-        valueanimator.start()
-
-
-
         chartView = findViewById<LineChartView>(R.id.chartView)
-
-
 
 
         comms_button.setOnClickListener {
