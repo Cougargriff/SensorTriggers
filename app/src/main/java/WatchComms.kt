@@ -17,10 +17,19 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.FirebaseUserMetadata
+import com.google.firebase.firestore.FirebaseFirestore
+
 import kotlinx.android.synthetic.main.activity_login_full.*
+
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class WatchComms : AppCompatActivity()
@@ -39,12 +48,15 @@ class WatchComms : AppCompatActivity()
     var HR_DATA = HashMap<Int, Int>()
     lateinit var chartView : LineChartView
 
+    var mAuth  = FirebaseAuth.getInstance()
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_watch_comms)
         comms_view.setBackgroundColor(resources.getColor(R.color.blueish))
+
 
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
@@ -66,10 +78,32 @@ class WatchComms : AppCompatActivity()
         }
 
         test_button.setOnClickListener {
+
+
             transmit_test("sync")
         }
 
     }
+
+    fun syncDB()
+    {
+        var toStore = mutableMapOf<String, Any>()
+
+        for(key in HR_DATA.keys.sorted())
+        {
+            toStore.put(key.toString(), HR_DATA.get(key)!!)
+        }
+        db.collection("users").document(mAuth.uid.toString())
+                .set(toStore)
+                .addOnSuccessListener {
+                    Log.d("db", "DocumentSnapshot added with ID: ")
+                }
+                .addOnFailureListener {
+                    Log.d("db error", "error adding document")
+                }
+    }
+
+
 
     fun updateChart(sample : HashMap<Int, Int>, chartView: LineChartView)
     {
@@ -162,6 +196,8 @@ class WatchComms : AppCompatActivity()
                         CONSOLE_STRING = "Current Heart Rate : " + HR_DATA.toString() + "\n"
                         console.text = CONSOLE_STRING
                         updateChart(HR_DATA, chartView)
+
+                        syncDB()
                     }
                 }
             }
