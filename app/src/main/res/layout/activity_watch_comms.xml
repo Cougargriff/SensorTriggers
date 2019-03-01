@@ -9,6 +9,25 @@
     android:visibility="visible"
     tools:context=".WatchComms">
 
+    <Button
+        android:id="@+id/viewTriggers"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="99dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="5dp"
+        android:background="@drawable/roundshapebtn"
+        android:backgroundTint="@color/login_color"
+        android:backgroundTintMode="src_over"
+        android:clickable="true"
+        android:elevation="13dp"
+        android:text="View Triggers"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        android:textColor="@color/black"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@+id/transmit_button"
+        app:layout_constraintTop_toBottomOf="@+id/console" />
+
     <TextView
         android:id="@+id/console_label"
         android:layout_width="wrap_content"
@@ -24,6 +43,25 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chartBase" />
+
+    <Button
+        android:id="@+id/addTrigger"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="99dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="9dp"
+        android:background="@drawable/roundshapebtn"
+        android:backgroundTint="@color/login_color"
+        android:backgroundTintMode="src_over"
+        android:clickable="true"
+        android:elevation="13dp"
+        android:text="Create Trigger"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        android:textColor="@color/black"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@+id/comms_button"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/test_button"
@@ -139,7 +177,9 @@
             app:layout_constraintBottom_toTopOf="@+id/console"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/test_button" />
+            app:layout_constraintTop_toBottomOf="@+id/test_button" >
+
+        </com.db.chart.view.LineChartView>
     </android.support.v7.widget.CardView>
 
 

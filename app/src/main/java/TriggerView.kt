@@ -1,0 +1,97 @@
+package com.senstrgrs.griffinjohnson.sensortriggers
+
+import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import kotlinx.android.synthetic.main.trigger_cell.view.*
+import kotlinx.android.synthetic.main.trigger_view.*
+
+class TriggerView : AppCompatActivity()
+{
+
+    lateinit var trigger_list : ArrayList<Trigger>
+
+    private lateinit var recyclerView : RecyclerView
+    private lateinit var recycler_view_manager : RecyclerView.LayoutManager
+    private lateinit var recycler_viewAdapter : RecyclerView.Adapter<*>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.trigger_view)
+
+        trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
+
+        ////////////////////////////////////////
+        ///// SETTING UP THE RECYCLER VIEW /////
+        ////////////////////////////////////////
+
+        // create classes to manage recycler view
+        recyclerView = recycler_view
+        recycler_view_manager = LinearLayoutManager(this)
+        recycler_viewAdapter = MyListAdapter(trigger_list)
+
+
+        // Bind delegate and datasource methods to recycler view
+        recyclerView.apply{
+            setHasFixedSize(true)
+            layoutManager = recycler_view_manager
+            adapter = recycler_viewAdapter
+        }
+
+
+
+    }
+
+}
+
+class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+{
+    // my cell displays data in one textview. need more if more data
+    class ViewHolder(val cell_view : LinearLayout) : RecyclerView.ViewHolder(cell_view)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
+    {
+        val cell_view = LayoutInflater.from(parent.context).inflate(R.layout.trigger_cell, parent, false) as LinearLayout
+        return ViewHolder(cell_view)
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
+    {
+        holder.itemView.hr_num.text = myDataset[position].hr_val.toString()
+        holder.itemView.trigger_name.text = myDataset[position].name.toString()
+        holder.itemView.setOnClickListener {
+            View.OnClickListener{
+                // TODO : progress view per lift once you click on item
+
+            }
+        }
+    }
+
+    override fun getItemCount() = myDataset.size
+
+    fun removeAt(position: Int)
+    {
+        myDataset.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun swapItems(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            for (i in fromPosition..toPosition - 1) {
+                myDataset.set(i, myDataset.set(i+1, myDataset.get(i)));
+            }
+        } else {
+            for (i in fromPosition..toPosition + 1) {
+                myDataset.set(i, myDataset.set(i-1, myDataset.get(i)));
+            }
+        }
+
+        notifyItemMoved(fromPosition, toPosition)
+    }
+}
