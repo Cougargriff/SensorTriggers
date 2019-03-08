@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
+import android.view.Window
 import android.widget.EditText
 import android.widget.Toast
 import com.db.chart.animation.Animation
@@ -18,6 +19,7 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+import com.google.android.gms.common.Feature
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -152,11 +154,11 @@ class WatchComms : AppCompatActivity()
 
     fun showTriggerCreationDialog()
     {
-        var builder = AlertDialog.Builder(this, android.app.AlertDialog.THEME_TRADITIONAL)
-
+        var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
+                .setCustomTitle(View.inflate(this, R.layout.custom_title, null))
 
         builder.setView(R.layout.triggerdialog)
-                .setPositiveButton("Create Trigger") { dialog, _ ->
+                .setPositiveButton("Create") { dialog, _ ->
                     val d = dialog as Dialog
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)

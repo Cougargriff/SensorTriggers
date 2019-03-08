@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.content.Intent
 import android.content.Context
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.animation.AccelerateInterpolator
@@ -16,10 +17,12 @@ import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import co.revely.gradient.RevelyGradient
+import com.google.errorprone.annotations.CompatibleWith
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_login_full.view.*
 import com.google.firebase.auth.FirebaseUser
+import kotlinx.android.synthetic.main.triggerdialog.*
 import org.jetbrains.anko.*
 
 class MainActivity : AppCompatActivity()
@@ -123,13 +126,19 @@ class MainActivity : AppCompatActivity()
                 val auth = login_dispatch(lpacket)
 
                 alert("Are you sure you'd like to register with the following email?\n\n" + lpacket.email) {
-                    yesButton {
+                    yesButton{
                         auth.register()
                     }
                     noButton {
 
                     }
+                }.also {
+                    this.setTheme(R.style.MyDialogTheme)
                 }.show()
+                        .apply {
+                            getButton(AlertDialog.BUTTON_POSITIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
+                            getButton(AlertDialog.BUTTON_NEGATIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
+                        }
             }
         }
     }

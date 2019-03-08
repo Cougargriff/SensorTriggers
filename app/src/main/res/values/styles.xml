@@ -1,14 +1,21 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="MyTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:dialogPreferenceStyle">@style/MyDialogTheme</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="FullscreenTheme" parent="AppTheme">
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:background">@color/login_color</item>
+        <item name="android:dialogCornerRadius">15dp</item>
+        <item name="android:colorAccent">@color/blueish</item>
+    </style>
+
+    <style name="FullscreenTheme" parent="MyTheme">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
@@ -20,5 +27,6 @@
     <style name="NoActionBar" parent="@android:style/Theme.Holo.Light">
 
     </style>
+
 
 </resources>
