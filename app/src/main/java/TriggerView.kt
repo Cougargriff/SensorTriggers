@@ -1,6 +1,7 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -9,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
 
@@ -25,6 +27,14 @@ class TriggerView : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.trigger_view)
 
+        trigger_view.setBackgroundColor(resources.getColor(R.color.blueish))
+
+
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+
+
+
         trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
 
         ////////////////////////////////////////
@@ -39,7 +49,6 @@ class TriggerView : AppCompatActivity()
 
         // Bind delegate and datasource methods to recycler view
         recyclerView.apply{
-            setHasFixedSize(true)
             layoutManager = recycler_view_manager
             adapter = recycler_viewAdapter
         }
@@ -64,7 +73,7 @@ class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<R
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
         holder.itemView.hr_num.text = myDataset[position].hr_val.toString()
-        holder.itemView.trigger_name.text = myDataset[position].name.toString()
+        holder.itemView.trigger_name.text = myDataset[position].name
         holder.itemView.setOnClickListener {
             View.OnClickListener{
                 // TODO : progress view per lift once you click on item

@@ -5,6 +5,7 @@
     android:id="@+id/comms_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/blueish"
     android:backgroundTint="@color/blueish"
     android:visibility="visible"
     tools:context=".WatchComms">
@@ -14,8 +15,8 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="99dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:layout_marginEnd="5dp"
+        android:layout_marginBottom="90dp"
         android:background="@drawable/roundshapebtn"
         android:backgroundTint="@color/login_color"
         android:backgroundTintMode="src_over"
@@ -25,32 +26,16 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
         android:textColor="@color/black"
         android:visibility="visible"
-        app:layout_constraintEnd_toStartOf="@+id/transmit_button"
-        app:layout_constraintTop_toBottomOf="@+id/console" />
-
-    <TextView
-        android:id="@+id/console_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="152dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="152dp"
-        android:text="Console"
-        android:textAlignment="center"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
-        android:textSize="30sp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chartBase" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/transmit_button" />
 
     <Button
         android:id="@+id/addTrigger"
         style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="99dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         android:layout_marginTop="48dp"
-        android:layout_marginEnd="9dp"
         android:background="@drawable/roundshapebtn"
         android:backgroundTint="@color/login_color"
         android:backgroundTintMode="src_over"
@@ -60,47 +45,25 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
         android:textColor="@color/black"
         android:visibility="visible"
-        app:layout_constraintEnd_toStartOf="@+id/comms_button"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/test_button"
+        android:id="@+id/sync_button"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="74dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="34dp"
         android:layout_marginTop="48dp"
         android:layout_marginEnd="16dp"
-        android:backgroundTint="@color/login_color"
         android:background="@drawable/roundshapebtn"
+        android:backgroundTint="@color/login_color"
         android:backgroundTintMode="add"
+        android:elevation="13dp"
         android:text="sync"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
         android:textColor="@color/black"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/comms_button"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <Button
-        android:id="@+id/comms_button"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="164dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="119dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="119dp"
-        android:background="@drawable/roundshapebtn"
-        android:backgroundTint="@color/login_color"
-        android:backgroundTintMode="src_over"
-        android:clickable="true"
-        android:elevation="13dp"
-        android:text="Connect To App"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <TextView
@@ -108,29 +71,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
-        android:layout_marginTop="88dp"
+        android:layout_marginTop="60dp"
         android:layout_marginEnd="49dp"
-        android:layout_marginBottom="29dp"
         android:text="Watch Communication"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
         android:textSize="36sp"
-        app:layout_constraintBottom_toTopOf="@+id/comms_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/console"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:layout_marginTop="23dp"
-        android:background="@color/login_color"
-        android:contentDescription="Console"
-        android:textColor="@color/black"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/console_label" />
 
     <Button
         android:id="@+id/transmit_button"
@@ -143,6 +91,7 @@
         android:background="@drawable/roundshapebtn"
         android:backgroundTint="@color/login_color"
         android:backgroundTintMode="add"
+        android:elevation="13dp"
         android:text="Set Temporal"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
         android:textColor="@color/black"
@@ -158,12 +107,13 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="4dp"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:cardBackgroundColor="@color/login_color"
+        app:cardCornerRadius="15dp"
         app:cardElevation="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/test_button">
+        app:layout_constraintTop_toBottomOf="@+id/sync_button">
 
         <com.db.chart.view.LineChartView
             android:id="@+id/chartView"
@@ -173,14 +123,26 @@
             android:layout_marginTop="46dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="23dp"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/console"
+            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/test_button" >
+            app:layout_constraintTop_toBottomOf="@+id/sync_button">
 
         </com.db.chart.view.LineChartView>
     </android.support.v7.widget.CardView>
+
+    <ProgressBar
+        android:id="@+id/graphLoad"
+        style="@android:style/Widget.Material.Light.ProgressBar.Horizontal"
+        android:layout_width="0dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:progressTint="@color/login_color"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chartBase" />
 
 
 </android.support.constraint.ConstraintLayout>

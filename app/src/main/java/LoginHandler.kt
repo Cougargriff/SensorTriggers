@@ -11,6 +11,7 @@ import android.R.attr.password
 import android.content.Context
 import android.content.Intent
 import android.support.v4.content.ContextCompat
+import org.jetbrains.anko.*
 import android.support.v4.content.ContextCompat.startActivity
 import android.util.Log
 import com.google.firebase.FirebaseApp
@@ -20,11 +21,9 @@ import org.jetbrains.anko.makeCall
 class LoginHandler(lPacket : MainActivity.User, context: Context)
 {
     var mAuth  = FirebaseAuth.getInstance()
-
     var email = lPacket.email
     var psw = lPacket.password
     var context = context
-
 
     fun transition()
     {
@@ -45,14 +44,13 @@ class LoginHandler(lPacket : MainActivity.User, context: Context)
 
     fun register()
     {
-        mAuth.createUserWithEmailAndPassword(email, psw).addOnCompleteListener {
 
+        mAuth.createUserWithEmailAndPassword(email, psw).addOnCompleteListener {
             if(it.isSuccessful)
             {
                 // go to new screen
                 transition()
             }
         }
-
     }
 }

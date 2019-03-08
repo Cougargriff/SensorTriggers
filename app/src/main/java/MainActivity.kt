@@ -38,15 +38,11 @@ class MainActivity : AppCompatActivity()
         FirebaseApp.getInstance()
         FirebaseApp.initializeApp(applicationContext)
 
-
-
         RevelyGradient
                 .linear()
                 .angle(45f)
                 .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#C850C0"), Color.parseColor("#FFCC80")))
                 .onBackgroundOf(view)
-
-
 
         val valueanimator = ValueAnimator.ofFloat(0f, 1f)
         valueanimator.addUpdateListener {
@@ -59,19 +55,14 @@ class MainActivity : AppCompatActivity()
             pass_box.alpha = value
         }
 
-
         valueanimator.interpolator = AccelerateInterpolator()
-        valueanimator.duration = 3000L
+        valueanimator.duration = 2000L
 
+        ObjectAnimator.ofFloat(base, "translationY", -100f)
+                .setDuration(1200)
+                .start()
 
-
-        val fadeIn = ObjectAnimator.ofFloat(base, "translationY", -100f)
-        fadeIn.setDuration(1900)
-        
-        fadeIn.start()
         valueanimator.start()
-
-
 
         loginButton.setOnClickListener {
 
@@ -96,7 +87,6 @@ class MainActivity : AppCompatActivity()
                 err++
             }
 
-
             if(err == 0)
             {
                 Toast.makeText(this, "Logging in...", Toast.LENGTH_LONG)
@@ -104,7 +94,6 @@ class MainActivity : AppCompatActivity()
                 val auth = login_dispatch(lpacket)
                 auth.login()
             }
-
         }
 
         register_fab.setOnClickListener {
@@ -129,7 +118,6 @@ class MainActivity : AppCompatActivity()
                 err++
             }
 
-
             if(err == 0)
             {
                 val auth = login_dispatch(lpacket)
@@ -144,16 +132,10 @@ class MainActivity : AppCompatActivity()
                 }.show()
             }
         }
-
     }
-
 
     fun login_dispatch(user : User) : LoginHandler
     {
         return LoginHandler(user, this)
     }
-
-
-
-
 }
