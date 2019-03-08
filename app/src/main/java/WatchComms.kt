@@ -3,13 +3,19 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.animation.ObjectAnimator
 import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
+import android.app.Dialog
+import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import android.widget.EditText
 import android.widget.Toast
 import co.revely.gradient.RevelyGradient
 import com.db.chart.model.LineSet
@@ -27,8 +33,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_login_full.*
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
+import kotlinx.android.synthetic.main.triggerdialog.*
 import org.jetbrains.anko.toast
 import java.util.*
+import java.util.zip.Inflater
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 
@@ -46,6 +55,9 @@ class WatchComms : AppCompatActivity()
     var status = "OFF"
 
     var HR_DATA = HashMap<Int, Int>()
+
+    var trigger_list = ArrayList<Trigger>()
+
     lateinit var chartView : LineChartView
 
     var mAuth  = FirebaseAuth.getInstance()
@@ -83,18 +95,57 @@ class WatchComms : AppCompatActivity()
             transmit_test("sync")
         }
 
+        addTrigger.setOnClickListener {
+            showTriggerCreationDialog()
+        }
+
+        viewTriggers.setOnClickListener {
+            val intent = Intent(this, TriggerView::class.java)
+            intent.putExtra("triggers", trigger_list)
+
+            ContextCompat.startActivity(this, intent, null)
+
+        }
+
+    }
+
+    fun showTriggerCreationDialog()
+    {
+        var builder = AlertDialog.Builder(this, android.app.AlertDialog.THEME_TRADITIONAL)
+
+
+        builder.setView(R.layout.triggerdialog)
+                .setPositiveButton("Create Trigger") { dialog, which ->
+                    val d = dialog as Dialog
+                    // TODO - get hr info and name
+                    val hr_edit = d.findViewById<EditText>(R.id.hr)
+                    val name_edit = d.findViewById<EditText>(R.id.trigger_name)
+                    trigger_list.add(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt()))
+
+                    toast("New Trigger was added to application")
+
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, which ->
+                    dialog.cancel()
+                }
+
+        builder.show()
     }
 
     fun syncDB()
     {
+        // check for trigger info?? TODO
+
         var toStore = mutableMapOf<String, Any>()
 
         for(key in HR_DATA.keys.sorted())
         {
             toStore.put(key.toString(), HR_DATA.get(key)!!)
         }
+
         db.collection("users").document(mAuth.uid.toString())
-                .set(toStore)
+                .update(toStore)
                 .addOnSuccessListener {
                     Log.d("db", "DocumentSnapshot added with ID: ")
                 }
@@ -103,6 +154,10 @@ class WatchComms : AppCompatActivity()
                 }
     }
 
+    fun triggerFilter(sample : HashMap<Int, Int>)
+    {
+
+    }
 
 
     fun updateChart(sample : HashMap<Int, Int>, chartView: LineChartView)
@@ -197,7 +252,8 @@ class WatchComms : AppCompatActivity()
                         console.text = CONSOLE_STRING
                         updateChart(HR_DATA, chartView)
 
-                        syncDB()
+                        syncDB() // pushes any new hash table info from watch to firestore
+
                     }
                 }
             }

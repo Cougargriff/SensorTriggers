@@ -28,6 +28,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".WatchComms"></activity>
+        <activity android:name=".TriggerView"></activity>
     </application>
 
 </manifest>

@@ -26,9 +26,6 @@ class MainActivity : AppCompatActivity()
 {
     data class User(var email : String, var password : String)
 
-
-
-
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -146,13 +143,9 @@ class MainActivity : AppCompatActivity()
                     }
                 }.show()
             }
-
-
         }
 
     }
-
-
 
 
     fun login_dispatch(user : User) : LoginHandler
