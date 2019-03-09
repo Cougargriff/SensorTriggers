@@ -27,8 +27,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WatchComms"></activity>
-        <activity android:name=".TriggerView"></activity>
+        <activity android:name=".WatchComms"
+            android:theme="@style/MyTheme">
+        </activity>
+        <activity android:name=".TriggerView"
+            android:theme="@style/MyTheme"></activity>
     </application>
 
 </manifest>

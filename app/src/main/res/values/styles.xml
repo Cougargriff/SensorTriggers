@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="android:dialogPreferenceStyle">@style/MyDialogTheme</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/black</item>
     </style>
 
     <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">

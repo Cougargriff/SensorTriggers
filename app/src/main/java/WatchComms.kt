@@ -8,9 +8,11 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.Window
 import android.widget.EditText
+import android.widget.SeekBar
 import android.widget.Toast
 import com.db.chart.animation.Animation
 import com.db.chart.model.LineSet
@@ -19,6 +21,8 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+import com.github.nisrulz.sensey.PinchScaleDetector
+import com.github.nisrulz.sensey.Sensey
 import com.google.android.gms.common.Feature
 
 import com.google.firebase.auth.FirebaseAuth
@@ -115,6 +119,30 @@ class WatchComms : AppCompatActivity()
 
         }
 
+//        Sensey.getInstance().init(this)
+////        Sensey.getInstance().startPinchScaleDetection(this, pinchListener())
+
+        seekBar.max = 1000
+        seek_progress.text = seekBar.progress.toString()
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+            {
+                seek_progress.text = progress.toString()
+               updateChart(HR_DATA, chartView, (progress.toFloat() / 1000f), false)
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?)
+            {
+                //TODO("not implemented") To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?)
+            {
+                //TODO("not implemented") To change body of created functions use File | Settings | File Templates.
+            }
+        })
+
     }
 
     // *********************
@@ -129,11 +157,17 @@ class WatchComms : AppCompatActivity()
 
     override fun onBackPressed()
     {
-        if(connectiq != null)
+        try
         {
             connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
-            mAuth.signOut()
+
         }
+        catch (e : UninitializedPropertyAccessException)
+        {
+
+        }
+
+        mAuth.signOut()
         super.onBackPressed()
     }
 
@@ -145,7 +179,15 @@ class WatchComms : AppCompatActivity()
     override fun onDestroy()
     {
         super.onDestroy()
-        connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
+        try
+        {
+            connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
+
+        }
+        catch (e : UninitializedPropertyAccessException)
+        {
+
+        } //  de-register from watch
         mAuth.signOut()
     }
 
@@ -274,27 +316,41 @@ class WatchComms : AppCompatActivity()
     }
 
 
-    fun updateChart(sample : HashMap<Int, Int>, chartView: LineChartView)
+    // change default to 0!!
+    fun updateChart(sample : HashMap<Int, Int>, chartView: LineChartView, scaler : Float = 0.001f, animate : Boolean = true)
     {
         chartView.reset()
         var ln = LineSet()
         var keys = sample.keys.sorted()
-        for(key in keys)
+        keys = keys.subList((0 + (keys.size - 1) * scaler).toInt(), keys.size - 1) // todo :
+        if(!keys.isEmpty())
         {
-            val value = sample.get(key)!!.toFloat()
-            var pnt = Point("", value)
+            for(key in keys)
+            {
+                val value = sample.get(key)!!.toFloat()
+                var pnt = Point("", value)
 
-            ln.addPoint(pnt)
+                ln.addPoint(pnt)
 
+            }
+            ln.setSmooth(true)
+            ln.setThickness(4f)
+            chartView.addData(ln)
+
+            chartView.setClickablePointRadius(10f)
+
+
+            if(animate)
+            {
+                var anim = Animation()
+                anim.setDuration(1200)
+                chartView.show(anim)
+            }
+            else
+            {
+                chartView.show()
+            }
         }
-        ln.setSmooth(true)
-        ln.setThickness(4f)
-        chartView.addData(ln)
-
-
-        var anim = Animation()
-        anim.setDuration(1200)
-        chartView.show(anim)
     }
 
     fun makeComponentsVisible()
@@ -376,6 +432,26 @@ class WatchComms : AppCompatActivity()
     // *******************
     // Listener Interfaces
     // *******************
+    fun pinchListener() : PinchScaleDetector.PinchScaleListener =
+            object : PinchScaleDetector.PinchScaleListener
+            {
+                override fun onScale(p0: ScaleGestureDetector?, p1: Boolean)
+                {
+
+                    updateChart(HR_DATA, chartView, p0!!.currentSpanX, false)
+
+                }
+
+                override fun onScaleEnd(p0: ScaleGestureDetector?) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+
+                override fun onScaleStart(p0: ScaleGestureDetector?) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+            }
+
+
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
             object : ConnectIQ.IQApplicationEventListener
             {
@@ -456,8 +532,6 @@ class WatchComms : AppCompatActivity()
                     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                 }
             }
-
-
 }
 
 
