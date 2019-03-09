@@ -14,16 +14,16 @@ import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
 
-class TriggerView : AppCompatActivity()
-{
+class TriggerView : AppCompatActivity() {
 
-    lateinit var trigger_list : ArrayList<Trigger>
+    lateinit var trigger_list: ArrayList<Trigger>
 
-    private lateinit var recyclerView : RecyclerView
-    private lateinit var recycler_view_manager : RecyclerView.LayoutManager
-    private lateinit var recycler_viewAdapter : RecyclerView.Adapter<*>
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var recycler_view_manager: RecyclerView.LayoutManager
+    private lateinit var recycler_viewAdapter: RecyclerView.Adapter<*>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.trigger_view)
 
@@ -48,34 +48,29 @@ class TriggerView : AppCompatActivity()
 
 
         // Bind delegate and datasource methods to recycler view
-        recyclerView.apply{
+        recyclerView.apply {
             layoutManager = recycler_view_manager
             adapter = recycler_viewAdapter
         }
-
-
-
     }
 
 }
 
-class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     // my cell displays data in one textview. need more if more data
-    class ViewHolder(val cell_view : LinearLayout) : RecyclerView.ViewHolder(cell_view)
+    class ViewHolder(val cell_view: LinearLayout) : RecyclerView.ViewHolder(cell_view)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
-    {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val cell_view = LayoutInflater.from(parent.context).inflate(R.layout.trigger_cell, parent, false) as LinearLayout
         return ViewHolder(cell_view)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
-    {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         holder.itemView.hr_num.text = myDataset[position].hr_val.toString()
         holder.itemView.trigger_name.text = myDataset[position].name
         holder.itemView.setOnClickListener {
-            View.OnClickListener{
+            View.OnClickListener {
                 // TODO : progress view per lift once you click on item
 
             }
@@ -84,8 +79,7 @@ class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<R
 
     override fun getItemCount() = myDataset.size
 
-    fun removeAt(position: Int)
-    {
+    fun removeAt(position: Int) {
         myDataset.removeAt(position)
         notifyItemRemoved(position)
     }
@@ -93,11 +87,11 @@ class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<R
     fun swapItems(fromPosition: Int, toPosition: Int) {
         if (fromPosition < toPosition) {
             for (i in fromPosition..toPosition - 1) {
-                myDataset.set(i, myDataset.set(i+1, myDataset.get(i)));
+                myDataset.set(i, myDataset.set(i + 1, myDataset.get(i)));
             }
         } else {
             for (i in fromPosition..toPosition + 1) {
-                myDataset.set(i, myDataset.set(i-1, myDataset.get(i)));
+                myDataset.set(i, myDataset.set(i - 1, myDataset.get(i)));
             }
         }
 

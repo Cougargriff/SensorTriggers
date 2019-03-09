@@ -23,7 +23,6 @@ import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
 import com.github.nisrulz.sensey.PinchScaleDetector
 import com.github.nisrulz.sensey.Sensey
-import com.google.android.gms.common.Feature
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -109,6 +108,7 @@ class WatchComms : AppCompatActivity()
 
         addTrigger.setOnClickListener {
             showTriggerCreationDialog()
+            trigger_num.text = trigger_list.size.toString() + " Triggers"
         }
 
         viewTriggers.setOnClickListener {
@@ -118,30 +118,6 @@ class WatchComms : AppCompatActivity()
             ContextCompat.startActivity(this, intent, null)
 
         }
-
-//        Sensey.getInstance().init(this)
-////        Sensey.getInstance().startPinchScaleDetection(this, pinchListener())
-
-        seekBar.max = 1000
-        seek_progress.text = seekBar.progress.toString()
-
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
-            {
-                seek_progress.text = progress.toString()
-               updateChart(HR_DATA, chartView, (progress.toFloat() / 1000f), false)
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?)
-            {
-                //TODO("not implemented") To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?)
-            {
-                //TODO("not implemented") To change body of created functions use File | Settings | File Templates.
-            }
-        })
 
     }
 
@@ -249,7 +225,6 @@ class WatchComms : AppCompatActivity()
 
     fun syncTriggers()
     {
-
         for(t in trigger_list)
         {
             var toStore = mutableMapOf<String, Any>()
@@ -257,7 +232,6 @@ class WatchComms : AppCompatActivity()
             userRef.collection("triggers").document(t.name)
                     .set(toStore, SetOptions.merge())
         }
-
     }
 
     // gets and sets whatever HR data is in the db for the current day
@@ -286,6 +260,8 @@ class WatchComms : AppCompatActivity()
                         getTriggersFromSnap(data!!)
                     }
                 }
+
+
     }
 
     fun getTriggersFromSnap(data : QuerySnapshot)
@@ -295,11 +271,13 @@ class WatchComms : AppCompatActivity()
             val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10?
             trigger_list.add(Trigger(tSnap.id, (thresh as Long).toInt()))
         }
+        trigger_num.text = trigger_list.size.toString() + " Triggers"
     }
 
     fun onSyncComplete()
     {
         graphLoad.visibility = View.INVISIBLE
+
     }
 
     fun getTimestamp() : String
@@ -360,6 +338,7 @@ class WatchComms : AppCompatActivity()
 
         transmit_button.visibility = View.VISIBLE
         sync_button.visibility = View.VISIBLE
+
 
         val valueanimator = ValueAnimator.ofFloat(0f, 1f)
         valueanimator.addUpdateListener {
@@ -432,26 +411,6 @@ class WatchComms : AppCompatActivity()
     // *******************
     // Listener Interfaces
     // *******************
-    fun pinchListener() : PinchScaleDetector.PinchScaleListener =
-            object : PinchScaleDetector.PinchScaleListener
-            {
-                override fun onScale(p0: ScaleGestureDetector?, p1: Boolean)
-                {
-
-                    updateChart(HR_DATA, chartView, p0!!.currentSpanX, false)
-
-                }
-
-                override fun onScaleEnd(p0: ScaleGestureDetector?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-
-                override fun onScaleStart(p0: ScaleGestureDetector?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
-            }
-
-
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
             object : ConnectIQ.IQApplicationEventListener
             {
