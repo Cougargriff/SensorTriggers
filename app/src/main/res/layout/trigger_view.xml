@@ -6,27 +6,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="111dp"
-        android:layout_marginTop="55dp"
-        android:layout_marginEnd="112dp"
-        android:layout_marginBottom="49dp"
-        android:text="HR Triggers"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
-        android:textSize="36sp"
+    <android.support.v7.widget.CardView
+        android:id="@+id/top_base"
+        android:layout_width="match_parent"
+        android:layout_height="157dp"
+        app:cardBackgroundColor="@color/blueish"
+        app:cardElevation="20dp"
         app:layout_constraintBottom_toTopOf="@+id/recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="111dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginEnd="112dp"
+            android:layout_marginBottom="49dp"
+            android:elevation="16dp"
+            android:text="HR Triggers"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
+            android:textSize="36sp"
+            app:layout_constraintBottom_toTopOf="@+id/recycler_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="0dp"
-        android:layout_height="671dp"
-        android:layout_marginTop="152dp"
+        android:layout_height="674dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="3dp"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:scrollbars="vertical"
@@ -34,6 +50,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/top_base"
+        tools:listitem="@layout/trigger_cell" />
 
 </android.support.constraint.ConstraintLayout>

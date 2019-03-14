@@ -1,5 +1,6 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -10,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import co.revely.gradient.RevelyGradient
+import kotlinx.android.synthetic.main.activity_login_full.*
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
@@ -32,6 +35,7 @@ class TriggerView : AppCompatActivity()
 
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+
 
 
 
@@ -72,8 +76,9 @@ class MyListAdapter(val myDataset : ArrayList<Trigger>) : RecyclerView.Adapter<R
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
-        holder.itemView.hr_num.text = myDataset[position].hr_val.toString()
-        holder.itemView.trigger_name.text = myDataset[position].name
+        val item = myDataset[position]
+        holder.itemView.hr_num.text = item.hr_val.toString()
+        holder.itemView.trigger_name.text = item.name
         holder.itemView.setOnClickListener {
             View.OnClickListener{
                 // TODO : progress view per lift once you click on item
