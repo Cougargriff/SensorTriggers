@@ -6,88 +6,70 @@
     android:layout_height="wrap_content"
     android:visibility="visible">
 
-    <android.support.constraint.ConstraintLayout
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible">
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginBottom="3dp"
+        app:cardBackgroundColor="@color/login_color"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="13dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/cardView"
-            android:layout_width="0dp"
-            android:layout_height="114dp"
-            android:layout_marginStart="3dp"
-            android:layout_marginEnd="3dp"
-            android:layout_marginBottom="3dp"
-            android:visibility="visible"
-            app:cardBackgroundColor="@color/login_color"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="13dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-            <android.support.constraint.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible">
+            <TextView
+                android:id="@+id/hr_num"
+                android:layout_width="0dp"
+                android:layout_height="19dp"
+                android:layout_marginStart="9dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="232dp"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/hr_view"
+                app:layout_constraintTop_toBottomOf="@+id/trigger_name" />
 
-                <TextView
-                    android:id="@+id/hr_num"
-                    android:layout_width="74dp"
-                    android:layout_height="19dp"
-                    android:layout_marginStart="9dp"
-                    android:layout_marginTop="18dp"
-                    android:textColor="@color/black"
-                    app:layout_constraintStart_toEndOf="@+id/hr_view"
-                    app:layout_constraintTop_toBottomOf="@+id/trigger_name" />
+            <TextView
+                android:id="@+id/trigger_name"
+                android:layout_width="244dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="9dp"
+                android:layout_marginBottom="46dp"
+                android:text="Lift Name"
+                android:textColor="@color/cardview_dark_background"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:typeface="monospace"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0" />
 
-                <TextView
-                    android:id="@+id/trigger_name"
-                    android:layout_width="244dp"
-                    android:layout_height="35dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="9dp"
-                    android:layout_marginBottom="46dp"
-                    android:text="Lift Name"
-                    android:textColor="@color/cardview_dark_background"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:typeface="monospace"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0" />
+            <TextView
+                android:id="@+id/hr_view"
+                android:layout_width="74dp"
+                android:layout_height="19dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="9dp"
+                android:text="Heart Rate :"
+                android:textColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/trigger_name"
+                app:layout_constraintVertical_bias="1.0" />
 
-                <TextView
-                    android:id="@+id/hr_view"
-                    android:layout_width="74dp"
-                    android:layout_height="19dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="9dp"
-                    android:text="Heart Rate :"
-                    android:textColor="@color/black"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/trigger_name"
-                    app:layout_constraintVertical_bias="1.0" />
+        </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
 
-                <Switch
-                    android:id="@+id/switch1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Switch"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </android.support.constraint.ConstraintLayout>
-        </android.support.v7.widget.CardView>
-
-    </android.support.constraint.ConstraintLayout>
 </LinearLayout>
