@@ -14,25 +14,31 @@ import android.support.v4.content.ContextCompat
 import org.jetbrains.anko.*
 import android.support.v4.content.ContextCompat.startActivity
 import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
 import com.google.firebase.FirebaseApp
 import org.jetbrains.anko.makeCall
 
 
-class LoginHandler(lPacket : MainActivity.User, context: Context)
+class LoginHandler(lPacket : MainActivity.User, context: Context, progress : ProgressBar)
 {
     var mAuth  = FirebaseAuth.getInstance()
     var email = lPacket.email
     var psw = lPacket.password
     var context = context
+    var pBar = progress
 
     fun transition()
     {
         val intent = Intent(context, WatchComms::class.java)
+
+        pBar.visibility = View.INVISIBLE
         ContextCompat.startActivity(context, intent, null)
     }
 
     fun login()
     {
+        pBar.visibility = View.VISIBLE
         mAuth.signInWithEmailAndPassword(email, psw).addOnCompleteListener {
             if(it.isSuccessful)
             {
@@ -44,7 +50,6 @@ class LoginHandler(lPacket : MainActivity.User, context: Context)
 
     fun register()
     {
-
         mAuth.createUserWithEmailAndPassword(email, psw).addOnCompleteListener {
             if(it.isSuccessful)
             {

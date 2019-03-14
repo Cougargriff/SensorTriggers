@@ -2,6 +2,9 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.app.Dialog
+import android.arch.lifecycle.ViewModelProvider
+import android.arch.lifecycle.ViewModelProviders
+import android.arch.lifecycle.ViewModelStore
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -29,6 +32,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
+import kotlinx.android.synthetic.main.login_full.*
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
@@ -44,41 +48,80 @@ import kotlin.concurrent.timerTask
 
 class WatchComms : AppCompatActivity()
 {
-
     lateinit var connectiq : ConnectIQ
     lateinit var available : IQDevice
     lateinit var paired : List<IQDevice>
     lateinit var chartView : LineChartView
     lateinit var app : IQApp
     lateinit var userRef : DocumentReference
+    lateinit var vm : ViewModel
 
     var status = "OFF"
-    var HR_DATA = HashMap<Int, Int>()
-    var trigger_list = ArrayList<Trigger>()
+    var HR_DATA = TreeMap<Int, Int>()
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
-
-
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        styling()
+        initialize()
+        uiUpdaters()
+        setButtonListeners()
+    }
+
+    fun styling()
+    {
         setContentView(R.layout.activity_watch_comms)
         comms_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
-
-
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-
         chartView = findViewById(R.id.chartView)
         graphLoad.isIndeterminate = true
+    }
 
-
+    fun initialize()
+    {
         userRef = db.collection("users").document(mAuth.uid.toString())
-        // check if there are any values for today already
-        getCurrentDB()
-        initialize()
+        vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
+        loadTimeout(5000)
+
+        connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
+        connectiq.initialize(this, true, connectListener())
+    }
+
+    fun uiUpdaters()
+    {
+        // HR Data Updater
+        vm.getHRData().observe(this, android.arch.lifecycle.Observer {
+            // update ui on hr data change
+            updateChart(it!!, chartView)
+        })
+
+        vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
+            // update ui on triggers change
+
+        })
+
+    }
+
+    fun loadTimeout(duration : Long)
+    {
+        val timer = Timer()
+        timer.schedule(timerTask {
+            if (graphLoad.visibility == View.VISIBLE)
+                graphLoad.visibility = View.INVISIBLE
+            else
+                runOnUiThread {
+                    toast("Sync timed out...")
+                }
+        }, duration)
+    }
+
+    fun setButtonListeners()
+    {
         transmit_button.setOnClickListener {
             when (status)
             {
@@ -90,47 +133,65 @@ class WatchComms : AppCompatActivity()
         sync_button.setOnClickListener {
             initialize()
             graphLoad.visibility = View.VISIBLE
-
             // set timeout for progress bar
-            val timer = Timer()
-            timer.schedule(timerTask {
-                if (graphLoad.visibility == View.VISIBLE)
-                    graphLoad.visibility = View.INVISIBLE
-                else
-                    runOnUiThread {
-                        toast("Sync timed out...")
-                    }
-            }, 5000)
-
-
+            loadTimeout(5000)
             transmit_string("sync")
         }
 
         addTrigger.setOnClickListener {
             showTriggerCreationDialog()
-            trigger_num.text = trigger_list.size.toString() + " Triggers"
+            // trigger_num.text = trigger_list.size.toString() + " Triggers"
         }
 
         viewTriggers.setOnClickListener {
             val intent = Intent(this, TriggerView::class.java)
-            intent.putExtra("triggers", trigger_list)
-
+            intent.putExtra("triggers", vm.getTriggers().value)
             ContextCompat.startActivity(this, intent, null)
+        }
+    }
 
+    fun initializeRest()
+    {
+        if(!checkDevices())
+        {
+            Log.i("ConnectIQ", "Couldn't find connected device.")
+            Toast.makeText(this, "NO DEVICE FOUND", Toast.LENGTH_SHORT)
+        }
+        else
+        {
+            Toast.makeText(this, "FOUND AVAILABLE DEVICE", Toast.LENGTH_LONG)
         }
 
+        getAppInstance() // starts listener callback chain
+    }
+
+    fun getAppInstance()
+    {
+        // app is initialized in callback appListener()
+        connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
+    }
+
+    fun checkDevices() : Boolean
+    {
+        paired = connectiq.knownDevices
+
+        if(paired.size > 0)
+        {
+            for(device in paired)
+            {
+                if(connectiq.getDeviceStatus(device) == IQDevice.IQDeviceStatus.CONNECTED)
+                {
+                    available = device
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     // *********************
     // Handling App Behavior
     // *********************
-
-    override fun onStop()
-    {
-        super.onStop()
-
-    }
-
     override fun onBackPressed()
     {
         try
@@ -145,11 +206,6 @@ class WatchComms : AppCompatActivity()
 
         mAuth.signOut()
         super.onBackPressed()
-    }
-
-    override fun onPause()
-    {
-        super.onPause()
     }
 
     override fun onDestroy()
@@ -169,7 +225,6 @@ class WatchComms : AppCompatActivity()
 
     // *********************
 
-
     fun showTriggerCreationDialog()
     {
         var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
@@ -183,8 +238,8 @@ class WatchComms : AppCompatActivity()
 
                     if(name_edit.text.length > 0 && hr_edit.text.length > 0)
                     {
-                        trigger_list.add(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt()))
-                        syncTriggers()
+                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt()))
+                        vm.syncTriggers()
 
                         toast("New Trigger was added to application")
 
@@ -201,84 +256,8 @@ class WatchComms : AppCompatActivity()
         builder.show()
     }
 
-    fun syncHR()
-    {
-        var toStore = mutableMapOf<String, Any>()
-
-        for(key in HR_DATA.keys)
-        {
-            toStore.put(key.toString(), HR_DATA.get(key)!!)
-        }
-
-        userRef.collection("hr_data").document(getTimestamp())
-            .set(toStore, SetOptions.merge())
-            .addOnSuccessListener {
-                Log.d("db", "DocumentSnapshot added with ID: ")
-
-                // stop graph progress bar on db callback
-                onSyncComplete()
-            }
-            .addOnFailureListener {
-                Log.d("db error", "error adding document")
-            }
-    }
-
-    fun syncTriggers()
-    {
-        for(t in trigger_list)
-        {
-            var toStore = mutableMapOf<String, Any>()
-            toStore.put("threshold", t.hr_val)
-            userRef.collection("triggers").document(t.name)
-                    .set(toStore, SetOptions.merge())
-        }
-    }
-
-    // gets and sets whatever HR data is in the db for the current day
-    fun getCurrentDB()
-    {
-        userRef.collection("hr_data").document(getTimestamp()).get()
-                .addOnCompleteListener {
-                    if(it.isSuccessful && it.result!!.exists())
-                    {
-                        var db_hash = it.result!!.data as HashMap<String, Int>
-                        for(key in db_hash.keys)
-                        {
-                            HR_DATA.put(key.toInt(), db_hash.get(key)!!)
-                        }
-                        updateChart(HR_DATA, chartView)
-                    }
-                    graphLoad.visibility = View.INVISIBLE
-                }
 
 
-        userRef.collection("triggers").get()
-                .addOnCompleteListener {
-                    if(it.isSuccessful && !it.result!!.isEmpty)
-                    {
-                        var data = it.result
-                        getTriggersFromSnap(data!!)
-                    }
-                }
-
-
-    }
-
-    fun getTriggersFromSnap(data : QuerySnapshot)
-    {
-        for(tSnap in data.documents)
-        {
-            val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10?
-            trigger_list.add(Trigger(tSnap.id, (thresh as Long).toInt()))
-        }
-        trigger_num.text = trigger_list.size.toString() + " Triggers"
-    }
-
-    fun onSyncComplete()
-    {
-        graphLoad.visibility = View.INVISIBLE
-
-    }
 
     fun getTimestamp() : String
     {
@@ -288,6 +267,18 @@ class WatchComms : AppCompatActivity()
                 .format(Instant.now())
     }
 
+
+    // callback function for hr sync
+    var HR_cb : () -> Unit = object : (() -> Unit)
+    {
+        override fun invoke() {
+            graphLoad.visibility = View.INVISIBLE
+            vm.loadHR()
+        }
+    }
+
+
+
     fun triggerFilter(sample : HashMap<Int, Int>)
     {
 
@@ -295,7 +286,7 @@ class WatchComms : AppCompatActivity()
 
 
     // change default to 0!!
-    fun updateChart(sample : HashMap<Int, Int>, chartView: LineChartView, scaler : Float = 0.001f, animate : Boolean = true)
+    fun updateChart(sample : TreeMap<Int, Int>, chartView: LineChartView, scaler : Float = 0.001f, animate : Boolean = true)
     {
         chartView.reset()
         var ln = LineSet()
@@ -349,7 +340,6 @@ class WatchComms : AppCompatActivity()
         }
         valueanimator.duration = 1400L
         valueanimator.start()
-
     }
 
     fun transmit(status : String)
@@ -362,51 +352,7 @@ class WatchComms : AppCompatActivity()
         connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
 
-    fun initialize()
-    {
-        connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
-        connectiq.initialize(this, true, connectListener())
-    }
 
-    fun initializeRest()
-    {
-        if(!checkDevices())
-        {
-            Log.i("ConnectIQ", "Couldn't find connected device.")
-            Toast.makeText(this, "NO DEVICE FOUND", Toast.LENGTH_SHORT)
-        }
-        else
-        {
-            Toast.makeText(this, "FOUND AVAILABLE DEVICE", Toast.LENGTH_LONG)
-        }
-
-        getAppInstance() // starts listener callback chain
-
-    }
-
-    fun getAppInstance()
-    {
-        // app is initialized in callback appListener()
-        connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
-    }
-
-    fun checkDevices() : Boolean
-    {
-        paired = connectiq.knownDevices
-
-        if(paired.size > 0)
-        {
-            for(device in paired)
-            {
-                if(connectiq.getDeviceStatus(device) == IQDevice.IQDeviceStatus.CONNECTED)
-                {
-                    available = device
-                    return true
-                }
-            }
-        }
-        return false
-    }
 
     // *******************
     // Listener Interfaces
@@ -420,8 +366,8 @@ class WatchComms : AppCompatActivity()
                     {
                         try
                         {
-                            HR_DATA.putAll(p2!![0] as HashMap<Int, Int>)
-                            syncHR() // pushes any new hash table info from watch to firestore
+                            vm.addNewHR(p2!![0] as HashMap<Int, Int>)
+                            vm.syncHR(HR_cb) // pushes any new hash table info from watch to firestore
                             updateChart(HR_DATA, chartView)
                         }
                         catch (e : ClassCastException)
