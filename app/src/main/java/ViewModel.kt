@@ -22,7 +22,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 {
     private val HR_DATA : MutableLiveData<TreeMap<Int, Int>> by lazy {
         MutableLiveData<TreeMap<Int, Int>>().also{
-            initialLoadHR()
+            loadHR()
         }
     }
     private val triggers : MutableLiveData<ArrayList<Trigger>> by lazy {
@@ -54,7 +54,6 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             .set(toStore, SetOptions.merge())
             .addOnSuccessListener {
                 Log.d("db", "DocumentSnapshot added with ID: ")
-
                 // stop graph progress bar on db callback
                 cb()
             }
@@ -107,22 +106,6 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             }
     }
 
-    private fun initialLoadHR()
-    {
-        userRef.collection("hr_data").document(getTimestamp()).get()
-                .addOnCompleteListener {
-                    if(it.isSuccessful && it.result!!.exists())
-                    {
-                        var db_hash = it.result!!.data as HashMap<String, Int>
-                        var hr_map = TreeMap<Int, Int>()
-                        for(key in db_hash.keys)
-                        {
-                            hr_map.put(key.toInt(), db_hash.get(key)!!)
-                        }
-                        HR_DATA.postValue(hr_map)
-                    }
-                }
-    }
 
     fun loadTriggers()
     {
@@ -142,7 +125,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
         for(tSnap in data.documents)
         {
-            val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10?
+            val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
             list.add(Trigger(tSnap.id, (thresh as Long).toInt()))
         }
         return list

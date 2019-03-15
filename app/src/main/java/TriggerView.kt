@@ -29,21 +29,14 @@ class TriggerView : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.trigger_view)
 
-        trigger_view.setBackgroundColor(resources.getColor(R.color.blueish))
-
-
-        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-
+        styling()
         trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
 
+    }
 
-        ////////////////////////////////////////
-        ///// SETTING UP THE RECYCLER VIEW /////
-        ////////////////////////////////////////
-
+    fun setupRecycler()
+    {
         // create classes to manage recycler view
         recyclerView = recycler_view
         recycler_view_manager = LinearLayoutManager(this)
@@ -57,14 +50,24 @@ class TriggerView : AppCompatActivity() {
         }
     }
 
+    fun styling()
+    {
+        setContentView(R.layout.trigger_view)
+
+        trigger_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+    }
+
 }
 
 class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     // my cell displays data in one textview. need more if more data
-    class ViewHolder(val cell_view: LinearLayout) : RecyclerView.ViewHolder(cell_view)
+    class ViewHolder(cell_view: LinearLayout) : RecyclerView.ViewHolder(cell_view)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
+    {
         val cell_view = LayoutInflater.from(parent.context).inflate(R.layout.trigger_cell, parent, false) as LinearLayout
         return ViewHolder(cell_view)
     }
@@ -84,19 +87,26 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
 
     override fun getItemCount() = myDataset.size
 
-    fun removeAt(position: Int) {
+    fun removeAt(position: Int)
+    {
         myDataset.removeAt(position)
         notifyItemRemoved(position)
     }
 
-    fun swapItems(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < toPosition) {
-            for (i in fromPosition..toPosition - 1) {
-                myDataset.set(i, myDataset.set(i + 1, myDataset.get(i)));
+    fun swapItems(fromPosition: Int, toPosition: Int)
+    {
+        if (fromPosition < toPosition)
+        {
+            for (i in fromPosition..toPosition - 1)
+            {
+                myDataset.set(i, myDataset.set(i + 1, myDataset.get(i)))
             }
-        } else {
-            for (i in fromPosition..toPosition + 1) {
-                myDataset.set(i, myDataset.set(i - 1, myDataset.get(i)));
+        }
+        else
+        {
+            for (i in fromPosition..toPosition + 1)
+            {
+                myDataset.set(i, myDataset.set(i - 1, myDataset.get(i)))
             }
         }
 

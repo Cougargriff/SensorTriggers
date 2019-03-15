@@ -20,7 +20,7 @@ class LoginHandler(lPacket : LoginActivity.User, context: Context, progress : Pr
     {
         val intent = Intent(context, WatchComms::class.java)
 
-        pBar.visibility = View.INVISIBLE
+        pBar.visibility = View.INVISIBLE // TODO leave here?
         ContextCompat.startActivity(context, intent, null)
     }
 
@@ -30,7 +30,6 @@ class LoginHandler(lPacket : LoginActivity.User, context: Context, progress : Pr
         mAuth.signInWithEmailAndPassword(email, psw).addOnCompleteListener {
             if(it.isSuccessful)
             {
-                // go to new screen
                 transition()
             }
         }
@@ -42,7 +41,6 @@ class LoginHandler(lPacket : LoginActivity.User, context: Context, progress : Pr
         mAuth.createUserWithEmailAndPassword(email, psw).addOnCompleteListener {
             if(it.isSuccessful)
             {
-                // go to new screen
                 transition()
             }
         }

@@ -2,20 +2,15 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.app.Dialog
-import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
-import android.arch.lifecycle.ViewModelStore
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
-import android.view.ScaleGestureDetector
 import android.view.View
-import android.view.Window
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.Toast
 import com.db.chart.animation.Animation
@@ -25,24 +20,15 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
-import com.github.nisrulz.sensey.PinchScaleDetector
-import com.github.nisrulz.sensey.Sensey
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.SetOptions
-import kotlinx.android.synthetic.main.login_full.*
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
 
@@ -69,12 +55,6 @@ class WatchComms : AppCompatActivity()
         initialize()
         uiUpdaters()
         setButtonListeners()
-        setupSeekBar()
-    }
-
-    fun setupSeekBar()
-    {
-
     }
 
     fun styling()
@@ -92,8 +72,7 @@ class WatchComms : AppCompatActivity()
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
-
-        loadTimeout(5000)
+        loadingTimeout(5000)
 
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
         connectiq.initialize(this, true, connectListener())
@@ -104,25 +83,22 @@ class WatchComms : AppCompatActivity()
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {
             // update ui on hr data change
-           // chartUpdater.invoke(it!!)
             chartUpdater.invoke(it!!, true)
         })
 
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
             // update ui on triggers change
-
         })
 
-        // setup seek bar
         seekBar.progress = 0
         seekBar.setOnSeekBarChangeListener(seek_cb)
     }
 
-    fun loadTimeout(duration : Long)
+    fun loadingTimeout(duration: Long)
     {
         val timer = Timer()
         timer.schedule(timerTask {
-            if (graphLoad.visibility == View.VISIBLE)
+            if (graphLoad.visibility == View.VISIBLE) // TODO better check possible?
                 graphLoad.visibility = View.INVISIBLE
             else
                 runOnUiThread {
@@ -143,14 +119,14 @@ class WatchComms : AppCompatActivity()
 
         sync_button.setOnClickListener {
             graphLoad.visibility = View.VISIBLE
+
             // set timeout for progress bar
-            loadTimeout(5000)
+            loadingTimeout(5000)
             transmit_string("sync")
         }
 
         addTrigger.setOnClickListener {
             showTriggerCreationDialog()
-            // trigger_num.text = trigger_list.size.toString() + " Triggers"
         }
 
         viewTriggers.setOnClickListener {
@@ -299,11 +275,11 @@ class WatchComms : AppCompatActivity()
         this.status = status
         connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
+
     fun transmit_string(status : String)
     {
         connectiq.sendMessage(available, app, status, sendMessageCallback())
     }
-
 
 
     // ******************
@@ -312,17 +288,12 @@ class WatchComms : AppCompatActivity()
 
     var seek_cb = object : SeekBar.OnSeekBarChangeListener
     {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?)
         {
-
-        }
-
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-          //  TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
             chartUpdater.invoke(vm.getHRData().value!!, false)
         }
     }
@@ -342,8 +313,7 @@ class WatchComms : AppCompatActivity()
             chartView.reset()
             var ln = LineSet()
             var keys = sample.keys.sorted()
-            var seek_progress = seekBar.progress.toFloat()
-            var scalar = (seek_progress / 1000f).toInt()
+            val scalar = (seekBar.progress.toFloat() / 1000f).toInt()
 
             keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
 
@@ -377,6 +347,10 @@ class WatchComms : AppCompatActivity()
         }
     }
 
+
+    // *******************
+    // Listener Interfaces
+    // *******************
 
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
             object : ConnectIQ.IQApplicationEventListener
@@ -420,7 +394,7 @@ class WatchComms : AppCompatActivity()
 
                 override fun onApplicationNotInstalled(p0: String?)
                 {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    //TODO("not implemented")
                 }
             }
 
@@ -454,7 +428,7 @@ class WatchComms : AppCompatActivity()
                 }
                 override fun onSdkShutDown()
                 {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                   // TODO("not implemented")
                 }
             }
 }
