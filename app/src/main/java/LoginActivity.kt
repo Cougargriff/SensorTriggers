@@ -15,48 +15,24 @@ import co.revely.gradient.RevelyGradient
 import kotlinx.android.synthetic.main.login_full.*
 import org.jetbrains.anko.*
 
-class MainActivity : AppCompatActivity()
+class LoginActivity : AppCompatActivity()
 {
     data class User(var email : String, var password : String)
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.login_full)
 
-        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-        window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
-        window.statusBarColor = Color.parseColor("#4158D0")
+        styling()
+        initialize()
+        setButtonListeners()
 
-        FirebaseApp.getInstance()
-        FirebaseApp.initializeApp(applicationContext)
 
-        RevelyGradient
-                .linear()
-                .angle(45f)
-                .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#C850C0"), Color.parseColor("#FFCC80")))
-                .onBackgroundOf(view)
 
-        val valueanimator = ValueAnimator.ofFloat(0f, 1f)
-        valueanimator.addUpdateListener {
-            val value = it.animatedValue as Float
+    }
 
-            register_fab.alpha = value
-            loginButton.alpha = value
-
-            email_box.alpha = value
-            pass_box.alpha = value
-        }
-
-        valueanimator.interpolator = AccelerateInterpolator()
-        valueanimator.duration = 2000L
-
-        ObjectAnimator.ofFloat(base, "translationY", -100f)
-                .setDuration(1200)
-                .start()
-
-        valueanimator.start()
-
+    fun setButtonListeners()
+    {
         loginButton.setOnClickListener {
 
             var lpacket = User(email = "", password = "")
@@ -68,7 +44,7 @@ class MainActivity : AppCompatActivity()
             }
             else
             {
-                err++;
+                err++
             }
 
             if(pass_box.text.toString().compareTo("") != 0)
@@ -125,13 +101,53 @@ class MainActivity : AppCompatActivity()
                 }.also {
                     this.setTheme(R.style.MyDialogTheme)
                 }.show()
-                        .apply {
-                            getButton(AlertDialog.BUTTON_POSITIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
-                            getButton(AlertDialog.BUTTON_NEGATIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
-                        }
+                    .apply {
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.let { it.setTextColor(ContextCompat.getColor(context, R.color.blueish)) }
+                    }
             }
         }
+    }
 
+    fun initialize()
+    {
+        FirebaseApp.getInstance()
+        FirebaseApp.initializeApp(applicationContext)
+    }
+
+    fun styling()
+    {
+        setContentView(R.layout.login_full)
+
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
+        window.statusBarColor = Color.parseColor("#4158D0")
+
+        RevelyGradient
+            .linear()
+            .angle(45f)
+            .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#C850C0"), Color.parseColor("#FFCC80")))
+            .onBackgroundOf(view)
+
+        val valueanimator = ValueAnimator.ofFloat(0f, 1f)
+        valueanimator.addUpdateListener {
+            val value = it.animatedValue as Float
+
+            register_fab.alpha = value
+            loginButton.alpha = value
+
+            email_box.alpha = value
+            pass_box.alpha = value
+        }
+
+        valueanimator.interpolator = AccelerateInterpolator()
+        valueanimator.duration = 2000L
+
+        ObjectAnimator.ofFloat(base, "translationY", -100f)
+                .setDuration(1200)
+                .start()
+
+        valueanimator.start()
     }
 
     fun login_dispatch(user : User) : LoginHandler
@@ -139,9 +155,9 @@ class MainActivity : AppCompatActivity()
         return LoginHandler(user, this, progressBar)
     }
 
-    override fun onPause() {
+    override fun onPause()
+    {
         super.onPause()
-
         progressBar.visibility = View.INVISIBLE
 
     }

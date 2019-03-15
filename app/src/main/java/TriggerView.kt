@@ -37,9 +37,6 @@ class TriggerView : AppCompatActivity() {
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
 
-
-
-
         trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
 
 

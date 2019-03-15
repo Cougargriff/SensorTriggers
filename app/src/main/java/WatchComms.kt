@@ -15,6 +15,7 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.Window
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.Toast
 import com.db.chart.animation.Animation
@@ -57,7 +58,6 @@ class WatchComms : AppCompatActivity()
     lateinit var vm : ViewModel
 
     var status = "OFF"
-    var HR_DATA = TreeMap<Int, Int>()
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
 
@@ -69,6 +69,12 @@ class WatchComms : AppCompatActivity()
         initialize()
         uiUpdaters()
         setButtonListeners()
+        setupSeekBar()
+    }
+
+    fun setupSeekBar()
+    {
+
     }
 
     fun styling()
@@ -86,6 +92,7 @@ class WatchComms : AppCompatActivity()
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
+
         loadTimeout(5000)
 
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
@@ -97,7 +104,8 @@ class WatchComms : AppCompatActivity()
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {
             // update ui on hr data change
-            updateChart(it!!, chartView)
+           // chartUpdater.invoke(it!!)
+            chartUpdater.invoke(it!!, true)
         })
 
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
@@ -105,6 +113,9 @@ class WatchComms : AppCompatActivity()
 
         })
 
+        // setup seek bar
+        seekBar.progress = 0
+        seekBar.setOnSeekBarChangeListener(seek_cb)
     }
 
     fun loadTimeout(duration : Long)
@@ -131,7 +142,6 @@ class WatchComms : AppCompatActivity()
         }
 
         sync_button.setOnClickListener {
-            initialize()
             graphLoad.visibility = View.VISIBLE
             // set timeout for progress bar
             loadTimeout(5000)
@@ -230,6 +240,7 @@ class WatchComms : AppCompatActivity()
         var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
                 .setCustomTitle(View.inflate(this, R.layout.custom_title, null))
 
+
         builder.setView(R.layout.triggerdialog)
                 .setPositiveButton("Create") { dialog, _ ->
                     val d = dialog as Dialog
@@ -258,68 +269,9 @@ class WatchComms : AppCompatActivity()
 
 
 
-
-    fun getTimestamp() : String
-    {
-        return DateTimeFormatter
-                .ofPattern("yyyy-MM-dd")
-                .withZone(ZoneOffset.UTC)
-                .format(Instant.now())
-    }
-
-
-    // callback function for hr sync
-    var HR_cb : () -> Unit = object : (() -> Unit)
-    {
-        override fun invoke() {
-            graphLoad.visibility = View.INVISIBLE
-            vm.loadHR()
-        }
-    }
-
-
-
     fun triggerFilter(sample : HashMap<Int, Int>)
     {
 
-    }
-
-
-    // change default to 0!!
-    fun updateChart(sample : TreeMap<Int, Int>, chartView: LineChartView, scaler : Float = 0.001f, animate : Boolean = true)
-    {
-        chartView.reset()
-        var ln = LineSet()
-        var keys = sample.keys.sorted()
-        keys = keys.subList((0 + (keys.size - 1) * scaler).toInt(), keys.size - 1) // todo :
-        if(!keys.isEmpty())
-        {
-            for(key in keys)
-            {
-                val value = sample.get(key)!!.toFloat()
-                var pnt = Point("", value)
-
-                ln.addPoint(pnt)
-
-            }
-            ln.setSmooth(true)
-            ln.setThickness(4f)
-            chartView.addData(ln)
-
-            chartView.setClickablePointRadius(10f)
-
-
-            if(animate)
-            {
-                var anim = Animation()
-                anim.setDuration(1200)
-                chartView.show(anim)
-            }
-            else
-            {
-                chartView.show()
-            }
-        }
     }
 
     fun makeComponentsVisible()
@@ -354,9 +306,78 @@ class WatchComms : AppCompatActivity()
 
 
 
-    // *******************
-    // Listener Interfaces
-    // *******************
+    // ******************
+    //  Function Objects
+    // ******************
+
+    var seek_cb = object : SeekBar.OnSeekBarChangeListener
+    {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean)
+        {
+
+        }
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+          //  TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+            chartUpdater.invoke(vm.getHRData().value!!, false)
+        }
+    }
+
+    var HR_cb = object : (() -> Unit)
+    {
+        override fun invoke()
+        {
+            graphLoad.visibility = View.INVISIBLE
+        }
+    }
+
+    var chartUpdater  = object : ((TreeMap<Int, Int>, Boolean) -> Unit)
+    {
+        override fun invoke(sample: TreeMap<Int, Int>, animate : Boolean)
+        {
+            chartView.reset()
+            var ln = LineSet()
+            var keys = sample.keys.sorted()
+            var seek_progress = seekBar.progress.toFloat()
+            var scalar = (seek_progress / 1000f).toInt()
+
+            keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
+
+            if(!keys.isEmpty())
+            {
+                for(key in keys)
+                {
+                    val value = sample.get(key)!!.toFloat()
+                    var pnt = Point("", value)
+
+                    ln.addPoint(pnt)
+
+                }
+                ln.setSmooth(true)
+                ln.setThickness(4f)
+                chartView.addData(ln)
+                chartView.setClickablePointRadius(10f)
+
+
+                if(animate)
+                {
+                    var anim = Animation()
+                    anim.setDuration(1200)
+                    chartView.show(anim)
+                }
+                else
+                {
+                    chartView.show()
+                }
+            }
+        }
+    }
+
+
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
             object : ConnectIQ.IQApplicationEventListener
             {
@@ -368,7 +389,6 @@ class WatchComms : AppCompatActivity()
                         {
                             vm.addNewHR(p2!![0] as HashMap<Int, Int>)
                             vm.syncHR(HR_cb) // pushes any new hash table info from watch to firestore
-                            updateChart(HR_DATA, chartView)
                         }
                         catch (e : ClassCastException)
                         {

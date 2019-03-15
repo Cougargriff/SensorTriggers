@@ -22,7 +22,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 {
     private val HR_DATA : MutableLiveData<TreeMap<Int, Int>> by lazy {
         MutableLiveData<TreeMap<Int, Int>>().also{
-            loadHR()
+            initialLoadHR()
         }
     }
     private val triggers : MutableLiveData<ArrayList<Trigger>> by lazy {
@@ -51,17 +51,17 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         }
 
         userRef.collection("hr_data").document(getTimestamp())
-                .set(toStore, SetOptions.merge())
-                .addOnSuccessListener {
-                    Log.d("db", "DocumentSnapshot added with ID: ")
+            .set(toStore, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("db", "DocumentSnapshot added with ID: ")
 
-                    // stop graph progress bar on db callback
-                    cb()
-                }
-                .addOnFailureListener {
-                    Log.d("db error", "error adding document")
-                    cb()
-                }
+                // stop graph progress bar on db callback
+                cb()
+            }
+            .addOnFailureListener {
+                Log.d("db error", "error adding document")
+                cb()
+            }
     }
 
     fun syncTriggers()
@@ -103,10 +103,25 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                         hr_map.put(key.toInt(), db_hash.get(key)!!)
                     }
                     HR_DATA.postValue(hr_map)
-                    // updateChart(HR_DATA, chartView)
                 }
-                //graphLoad.visibility = View.INVISIBLE
             }
+    }
+
+    private fun initialLoadHR()
+    {
+        userRef.collection("hr_data").document(getTimestamp()).get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful && it.result!!.exists())
+                    {
+                        var db_hash = it.result!!.data as HashMap<String, Int>
+                        var hr_map = TreeMap<Int, Int>()
+                        for(key in db_hash.keys)
+                        {
+                            hr_map.put(key.toInt(), db_hash.get(key)!!)
+                        }
+                        HR_DATA.postValue(hr_map)
+                    }
+                }
     }
 
     fun loadTriggers()
