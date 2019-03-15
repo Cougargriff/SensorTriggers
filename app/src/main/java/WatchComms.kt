@@ -183,12 +183,8 @@ class WatchComms : AppCompatActivity()
         try
         {
             connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
-
         }
-        catch (e : UninitializedPropertyAccessException)
-        {
-
-        }
+        catch (e : UninitializedPropertyAccessException) {}
 
         mAuth.signOut()
         super.onBackPressed()
@@ -305,6 +301,8 @@ class WatchComms : AppCompatActivity()
             graphLoad.visibility = View.INVISIBLE
         }
     }
+
+
 
     var chartUpdater  = object : ((TreeMap<Int, Int>, Boolean) -> Unit)
     {
