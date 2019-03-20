@@ -2,9 +2,70 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/triggerDialog"
-    android:layout_width="300dp"
+    android:layout_width="400dp"
     android:layout_height="wrap_content"
     android:orientation="vertical">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="183dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginEnd="182dp"
+            android:text="Type"
+            android:textAlignment="center"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+            android:textColor="@color/blueish"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/config_box"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <RadioGroup
+            android:id="@+id/r_group"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RadioButton
+                android:id="@+id/hr_radio"
+                style="@android:style/Widget.Material.CompoundButton.RadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="3dp"
+                android:text="HR"
+                android:textColor="@color/blueish" />
+
+            <RadioButton
+                android:id="@+id/geo_radio"
+                style="@android:style/Widget.Material.CompoundButton.RadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:text="GeoFence"
+                android:textColor="@color/blueish"
+                app:layout_constraintStart_toEndOf="@+id/hr_radio"
+                tools:layout_editor_absoluteY="3dp" />
+
+        </RadioGroup>
+
+    </android.support.constraint.ConstraintLayout>
 
     <EditText
         android:id="@+id/trigger_name"

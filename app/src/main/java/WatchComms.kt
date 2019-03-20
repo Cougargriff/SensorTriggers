@@ -10,9 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
-import android.widget.EditText
-import android.widget.SeekBar
-import android.widget.Toast
+import android.widget.*
 import com.db.chart.animation.Animation
 import com.db.chart.model.LineSet
 import com.db.chart.model.Point
@@ -53,17 +51,18 @@ class WatchComms : AppCompatActivity()
 
         styling()
         initialize()
+
         uiUpdaters()
         setButtonListeners()
     }
 
-    fun styling()
-    {
+    fun styling() {
         setContentView(R.layout.activity_watch_comms)
         comms_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         chartView = findViewById(R.id.chartView)
+
         graphLoad.isIndeterminate = true
     }
 
@@ -88,6 +87,7 @@ class WatchComms : AppCompatActivity()
 
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
             // update ui on triggers change
+            vm.syncTriggers()
         })
 
         seekBar.progress = 0
@@ -219,10 +219,11 @@ class WatchComms : AppCompatActivity()
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)
 
+                    //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
+
                     if(name_edit.text.length > 0 && hr_edit.text.length > 0)
                     {
-                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt()))
-                        vm.syncTriggers()
+                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt(), true))
 
                         toast("New Trigger was added to application")
 

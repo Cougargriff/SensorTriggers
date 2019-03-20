@@ -4,13 +4,9 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
-import android.view.View
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
-import kotlinx.android.synthetic.main.activity_watch_comms.*
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -65,28 +61,50 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
     fun syncTriggers()
     {
-        for(t in triggers.value!!)
+        if(triggers.value != null)
         {
-            var toStore = mutableMapOf<String, Any>()
-            toStore.put("threshold", t.hr_val)
-            userRef.collection("triggers").document(t.name)
-                    .set(toStore, SetOptions.merge())
+            for(t in triggers.value!!)
+            {
+                var toStore = mutableMapOf<String, Any>()
+                toStore.put("threshold", t.hr_val)
+                toStore.put("armed", t.armed)
+                userRef.collection("triggers").document(t.name)
+                        .set(toStore, SetOptions.merge())
+            }
         }
         loadTriggers()
+
     }
 
     fun addTrigger(trig : Trigger)
     {
         var new = triggers.value
-        new!!.add(trig)
+        if(new == null)
+        {
+            new = ArrayList<Trigger>().apply {
+                add(trig)
+            }
+        }
+        else
+        {
+            new!!.add(trig)
+        }
         triggers.postValue(new)
     }
 
     fun addNewHR(hash : HashMap<Int, Int>)
     {
         var new = HR_DATA.value
-        new!!.putAll(hash)
-        HR_DATA.postValue(new)
+        if(new != null)
+        {
+            new!!.putAll(hash)
+            HR_DATA.postValue(new)
+        }
+        else
+        {
+            HR_DATA.postValue(hash as TreeMap<Int, Int>)
+        }
+
     }
 
     fun loadHR()
@@ -113,9 +131,12 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 if(it.isSuccessful && !it.result!!.isEmpty)
                 {
                     var data = it.result
-                    triggers.postValue(getTriggersFromSnap(data!!)!!)
+                    val t = getTriggersFromSnap(data!!)
+                    triggers.value = t
                 }
+
             }
+
     }
 
     private fun getTriggersFromSnap(data : QuerySnapshot) : ArrayList<Trigger>
@@ -125,7 +146,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         for(tSnap in data.documents)
         {
             val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
-            list.add(Trigger(tSnap.id, (thresh as Long).toInt()))
+            val triggered = tSnap.get("armed")
+            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean))
         }
         return list
     }

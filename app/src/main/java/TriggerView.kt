@@ -23,12 +23,14 @@ class TriggerView : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-
         styling()
-        trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
-
-
+        initialize()
         setupRecycler()
+    }
+
+    fun initialize()
+    {
+        trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
     }
 
     fun setupRecycler()
@@ -73,12 +75,38 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         val item = myDataset[position]
         holder.itemView.hr_num.text = item.hr_val.toString()
         holder.itemView.trigger_name.text = item.name
-        holder.itemView.setOnClickListener {
-            View.OnClickListener {
-                // TODO : progress view per lift once you click on item
 
-            }
+
+        if(!myDataset[position].armed)
+        {
+            holder.itemView.chk_color.alpha = 0.3f
         }
+
+        holder.itemView.setOnClickListener {
+                // TODO : progress view per lift once you click on item
+                myDataset[position].armed = !myDataset[position].armed
+
+                if(myDataset[position].armed)
+                {
+                    holder.itemView.chk_color.alpha = 1f
+                }
+                else
+                {
+                    holder.itemView.chk_color.alpha = 0.3f
+                }
+        }
+
+
+        if(myDataset[position].armed)
+        {
+            holder.itemView.chk_color.alpha = 1f
+        }
+        else
+        {
+            holder.itemView.chk_color.alpha = 0.3f
+        }
+
+
     }
 
     override fun getItemCount() = myDataset.size
