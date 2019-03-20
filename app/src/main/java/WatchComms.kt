@@ -9,7 +9,9 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import com.db.chart.animation.Animation
 import com.db.chart.model.LineSet
@@ -56,7 +58,8 @@ class WatchComms : AppCompatActivity()
         setButtonListeners()
     }
 
-    fun styling() {
+    fun styling()
+    {
         setContentView(R.layout.activity_watch_comms)
         comms_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
@@ -133,6 +136,10 @@ class WatchComms : AppCompatActivity()
             val intent = Intent(this, TriggerView::class.java)
             intent.putExtra("triggers", vm.getTriggers().value)
             ContextCompat.startActivity(this, intent, null)
+        }
+
+        cal_fab.setOnClickListener {
+
         }
     }
 
@@ -211,15 +218,23 @@ class WatchComms : AppCompatActivity()
     {
         var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
                 .setCustomTitle(View.inflate(this, R.layout.custom_title, null))
-
-
-        builder.setView(R.layout.triggerdialog)
+                .setView(R.layout.triggerdialog)
                 .setPositiveButton("Create") { dialog, _ ->
                     val d = dialog as Dialog
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)
 
                     //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
+
+                    val datePicker = DatePicker(this)
+                    val calendar = Calendar.getInstance()
+                    calendar.timeInMillis = System.currentTimeMillis()
+                    datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH), { datePicker, year, month, day->
+                        textView.text = "Year: "+ year + " Month: "+ (month+1) + " Day: "+day
+                    })
+
+
 
                     if(name_edit.text.length > 0 && hr_edit.text.length > 0)
                     {

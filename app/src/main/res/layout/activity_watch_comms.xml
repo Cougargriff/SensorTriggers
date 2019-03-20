@@ -160,4 +160,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/graphLoad" />
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/cal_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="17dp"
+        android:clickable="true"
+        app:backgroundTint="@color/login_color"
+        app:layout_constraintBottom_toTopOf="@+id/chartBase"
+        app:layout_constraintEnd_toStartOf="@+id/sync_button"
+        app:srcCompat="@drawable/date" />
+
 </android.support.constraint.ConstraintLayout>
