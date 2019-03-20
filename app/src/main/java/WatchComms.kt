@@ -301,8 +301,7 @@ class WatchComms : AppCompatActivity()
             graphLoad.visibility = View.INVISIBLE
         }
     }
-
-
+    
 
     var chartUpdater  = object : ((TreeMap<Int, Int>, Boolean) -> Unit)
     {

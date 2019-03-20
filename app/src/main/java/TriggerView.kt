@@ -1,20 +1,14 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
-import android.arch.lifecycle.ViewModelProviders
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import co.revely.gradient.RevelyGradient
-import kotlinx.android.synthetic.main.login_full.*
-import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
 
@@ -33,6 +27,8 @@ class TriggerView : AppCompatActivity() {
         styling()
         trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
 
+
+        setupRecycler()
     }
 
     fun setupRecycler()

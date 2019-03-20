@@ -14,7 +14,7 @@
         android:layout_marginEnd="3dp"
         android:layout_marginBottom="3dp"
         app:cardBackgroundColor="@color/login_color"
-        app:cardCornerRadius="15dp"
+        app:cardCornerRadius="5dp"
         app:cardElevation="13dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,12 +40,12 @@
 
             <TextView
                 android:id="@+id/trigger_name"
-                android:layout_width="244dp"
+                android:layout_width="197dp"
                 android:layout_height="35dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="9dp"
                 android:layout_marginBottom="46dp"
-                android:text="Lift Name"
+                android:text="Trigger Name"
                 android:textColor="@color/cardview_dark_background"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -68,6 +68,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/trigger_name"
                 app:layout_constraintVertical_bias="1.0" />
+
+            <Switch
+                android:id="@+id/triggerSwitch"
+                android:layout_width="118dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="3dp"
+                android:layout_marginTop="34dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="29dp"
+                android:checked="false"
+                android:text="ON/OFF"
+                android:textColor="@color/black"
+                android:textOff="OFF"
+                android:textOn="ON"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/trigger_name"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>

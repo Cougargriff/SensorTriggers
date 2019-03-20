@@ -106,7 +106,6 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             }
     }
 
-
     fun loadTriggers()
     {
         userRef.collection("triggers").get()
