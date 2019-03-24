@@ -1,7 +1,11 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
+import android.app.Activity
+import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -9,8 +13,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
+import android.support.v7.widget.SimpleItemAnimator
+
+
 
 class TriggerView : AppCompatActivity() {
 
@@ -28,9 +38,21 @@ class TriggerView : AppCompatActivity() {
         setupRecycler()
     }
 
+    override fun onBackPressed() {
+        var intent = Intent()
+        intent.putExtra("triggers", trigger_list)
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
     fun initialize()
     {
         trigger_list = intent.getSerializableExtra("triggers") as ArrayList<Trigger>
+
+        lateinit var userRef : DocumentReference
+        userRef = FirebaseFirestore.getInstance().collection("users").document(FirebaseAuth.getInstance().uid.toString())
+
+        var vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
     }
 
     fun setupRecycler()
@@ -40,6 +62,9 @@ class TriggerView : AppCompatActivity() {
         recycler_view_manager = LinearLayoutManager(this)
         recycler_viewAdapter = MyListAdapter(trigger_list)
 
+        recyclerView.setHasFixedSize(true)
+
+        (recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 
         // Bind delegate and datasource methods to recycler view
         recyclerView.apply {
@@ -77,22 +102,25 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         holder.itemView.trigger_name.text = item.name
 
 
+
         if(!myDataset[position].armed)
         {
             holder.itemView.chk_color.alpha = 0.3f
         }
 
-        holder.itemView.setOnClickListener {
+        holder.itemView.title_view.setOnClickListener {
                 // TODO : progress view per lift once you click on item
                 myDataset[position].armed = !myDataset[position].armed
 
                 if(myDataset[position].armed)
                 {
                     holder.itemView.chk_color.alpha = 1f
+                    holder.itemView.sub_item.visibility = View.VISIBLE
                 }
                 else
                 {
                     holder.itemView.chk_color.alpha = 0.3f
+                    holder.itemView.sub_item.visibility = View.GONE
                 }
         }
 
@@ -100,14 +128,17 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         if(myDataset[position].armed)
         {
             holder.itemView.chk_color.alpha = 1f
+            holder.itemView.sub_item.visibility = View.VISIBLE
         }
         else
         {
             holder.itemView.chk_color.alpha = 0.3f
+            holder.itemView.sub_item.visibility = View.GONE
         }
 
 
     }
+
 
     override fun getItemCount() = myDataset.size
 

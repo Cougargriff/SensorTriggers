@@ -16,8 +16,8 @@ import kotlin.collections.HashMap
 
 class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewModel()
 {
-    private val HR_DATA : MutableLiveData<TreeMap<Int, Int>> by lazy {
-        MutableLiveData<TreeMap<Int, Int>>().also{
+    private val HR_DATA : MutableLiveData<HashMap<Int, Int>> by lazy {
+        MutableLiveData<HashMap<Int, Int>>().also{
             loadHR()
         }
     }
@@ -32,7 +32,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         return triggers
     }
 
-    fun getHRData() : LiveData<TreeMap<Int, Int>>
+    fun getHRData() : LiveData<HashMap<Int, Int>>
     {
         return HR_DATA
     }
@@ -68,6 +68,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 var toStore = mutableMapOf<String, Any>()
                 toStore.put("threshold", t.hr_val)
                 toStore.put("armed", t.armed)
+                toStore.put("type", t.type)
                 userRef.collection("triggers").document(t.name)
                         .set(toStore, SetOptions.merge())
             }
@@ -102,7 +103,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         }
         else
         {
-            HR_DATA.postValue(hash as TreeMap<Int, Int>)
+            HR_DATA.value = hash
         }
 
     }
@@ -114,7 +115,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 if(it.isSuccessful && it.result!!.exists())
                 {
                     var db_hash = it.result!!.data as HashMap<String, Int>
-                    var hr_map = TreeMap<Int, Int>()
+                    var hr_map = HashMap<Int, Int>()
                     for(key in db_hash.keys)
                     {
                         hr_map.put(key.toInt(), db_hash.get(key)!!)
@@ -122,6 +123,11 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                     HR_DATA.postValue(hr_map)
                 }
             }
+    }
+
+    fun setTriggers(t : ArrayList<Trigger>)
+    {
+        triggers.value = t
     }
 
     fun loadTriggers()
@@ -147,7 +153,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         {
             val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
             val triggered = tSnap.get("armed")
-            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean))
+            val type = tSnap.get("type")
+            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean, type as String))
         }
         return list
     }

@@ -49,6 +49,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="3dp"
+                android:buttonTint="@color/blueish"
+                android:checked="true"
                 android:text="HR"
                 android:textColor="@color/blueish" />
 
@@ -58,6 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
+                android:buttonTint="@color/blueish"
                 android:text="GeoFence"
                 android:textColor="@color/blueish"
                 app:layout_constraintStart_toEndOf="@+id/hr_radio"
@@ -73,16 +76,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Name"
-        android:inputType="text" />
+        android:inputType="text"
+        android:textColorHint="@color/blueish"
+        android:backgroundTint="@color/blueish"
+        android:textColor="@color/blueish" />
 
     <EditText
         android:id="@+id/hr"
         style="@style/Base.Widget.MaterialComponents.TextInputEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColorHint="@color/blueish"
+        android:backgroundTint="@color/blueish"
         android:ems="10"
         android:hint="Heart Rate Threshold"
         android:inputType="number" />
+
+    <TextView
+        android:id="@+id/lat_long"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:text="place name "
+        android:textAlignment="center"
+        android:textColor="@color/blueish"
+        android:visibility="gone" />
 
 
 </LinearLayout>

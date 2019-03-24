@@ -172,4 +172,15 @@
         app:layout_constraintEnd_toStartOf="@+id/sync_button"
         app:srcCompat="@drawable/date" />
 
+    <TextView
+        android:id="@+id/lat_lon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="66dp"
+        android:text="TextView"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+
 </android.support.constraint.ConstraintLayout>

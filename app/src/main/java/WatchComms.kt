@@ -1,9 +1,13 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -20,15 +24,23 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
+import kotlinx.android.synthetic.main.triggerdialog.*
+import kotlinx.android.synthetic.main.triggerdialog.view.*
+import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
+import java.security.Permission
+import java.security.Permissions
 import java.util.*
+import java.util.jar.Manifest
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
 
@@ -42,6 +54,7 @@ class WatchComms : AppCompatActivity()
     lateinit var app : IQApp
     lateinit var userRef : DocumentReference
     lateinit var vm : ViewModel
+    private lateinit var fusedLocationClient : FusedLocationProviderClient
 
     var status = "OFF"
     var mAuth  = FirebaseAuth.getInstance()
@@ -54,9 +67,23 @@ class WatchComms : AppCompatActivity()
         styling()
         initialize()
 
+        //checkPermissions(locationUpdates)
+
         uiUpdaters()
         setButtonListeners()
     }
+
+    fun checkPermissions(cb : (Context) -> Unit)
+    {
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            cb(this)
+        }
+    }
+
+
 
     fun styling()
     {
@@ -85,7 +112,8 @@ class WatchComms : AppCompatActivity()
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {
             // update ui on hr data change
-            chartUpdater.invoke(it!!, true)
+            chartUpdater.invoke(it!!, false)
+            vm.syncHR(HR_cb)
         })
 
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
@@ -135,7 +163,7 @@ class WatchComms : AppCompatActivity()
         viewTriggers.setOnClickListener {
             val intent = Intent(this, TriggerView::class.java)
             intent.putExtra("triggers", vm.getTriggers().value)
-            ContextCompat.startActivity(this, intent, null)
+            startActivityForResult(intent, 1)
         }
 
         cal_fab.setOnClickListener {
@@ -197,6 +225,16 @@ class WatchComms : AppCompatActivity()
         super.onBackPressed()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == 1 && resultCode == Activity.RESULT_OK) // from trigger list
+        {
+            val t = data!!.extras.get("triggers") as ArrayList<Trigger>
+            vm.setTriggers(t)
+        }
+    }
+
     override fun onDestroy()
     {
         super.onDestroy()
@@ -214,17 +252,36 @@ class WatchComms : AppCompatActivity()
 
     // *********************
 
-    fun showTriggerCreationDialog()
+    fun showTriggerCreationDialog() // TODO dialog class maker?
     {
+        var type = "h"
+        var v = LayoutInflater.from(this).inflate(R.layout.triggerdialog, null)
+        v.geo_radio.setOnClickListener {
+            v.lat_long.visibility = View.VISIBLE
+            v.hr.visibility = View.GONE
+        }
+
+        v.hr_radio.setOnClickListener {
+            v.lat_long.visibility = View.GONE
+            v.hr.visibility = View.VISIBLE
+        }
+
+
         var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
                 .setCustomTitle(View.inflate(this, R.layout.custom_title, null))
-                .setView(R.layout.triggerdialog)
+                .setView(v)
                 .setPositiveButton("Create") { dialog, _ ->
                     val d = dialog as Dialog
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)
 
                     //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
+
+                    when
+                    {
+                        d.geo_radio.isChecked -> type = "g"
+                        d.hr_radio.isChecked -> type = "h"
+                    }
 
                     val datePicker = DatePicker(this)
                     val calendar = Calendar.getInstance()
@@ -234,11 +291,14 @@ class WatchComms : AppCompatActivity()
                         textView.text = "Year: "+ year + " Month: "+ (month+1) + " Day: "+day
                     })
 
-
-
-                    if(name_edit.text.length > 0 && hr_edit.text.length > 0)
+                    if(hr_edit.text.toString().compareTo("") == 0)
                     {
-                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt(), true))
+                        hr_edit.setText("-1")
+                    }
+
+                    if(name_edit.text.length > 0)
+                    {
+                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt() , true, type))
 
                         toast("New Trigger was added to application")
 
@@ -319,9 +379,9 @@ class WatchComms : AppCompatActivity()
     }
     
 
-    var chartUpdater  = object : ((TreeMap<Int, Int>, Boolean) -> Unit)
+    var chartUpdater  = object : ((HashMap<Int, Int>, Boolean) -> Unit)
     {
-        override fun invoke(sample: TreeMap<Int, Int>, animate : Boolean)
+        override fun invoke(sample: HashMap<Int, Int>, animate : Boolean)
         {
             chartView.reset()
             var ln = LineSet()
@@ -342,8 +402,10 @@ class WatchComms : AppCompatActivity()
                 }
                 ln.setSmooth(true)
                 ln.setThickness(4f)
+
                 chartView.addData(ln)
                 chartView.setClickablePointRadius(10f)
+
 
 
                 if(animate)
@@ -374,8 +436,8 @@ class WatchComms : AppCompatActivity()
                     {
                         try
                         {
-                            vm.addNewHR(p2!![0] as HashMap<Int, Int>)
-                            vm.syncHR(HR_cb) // pushes any new hash table info from watch to firestore
+                            val hash = p2!![0] as HashMap<Int, Int>
+                            vm.addNewHR(hash)
                         }
                         catch (e : ClassCastException)
                         {
