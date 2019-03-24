@@ -123,6 +123,8 @@ class WatchComms : AppCompatActivity()
             vm.syncTriggers()
         })
 
+        seekBar.progress = 0
+        seekBar.setOnSeekBarChangeListener(seek_cb)
     }
 
     fun loadingTimeout(duration: Long)
@@ -363,17 +365,17 @@ class WatchComms : AppCompatActivity()
     //  Function Objects
     // ******************
 
-//    var seek_cb = object : SeekBar.OnSeekBarChangeListener
-//    {
-//        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
-//
-//        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-//
-//        override fun onStopTrackingTouch(seekBar: SeekBar?)
-//        {
-//            chartUpdater.invoke(vm.getHRData().value!!, false)
-//        }
-//    }
+    var seek_cb = object : SeekBar.OnSeekBarChangeListener
+    {
+        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {}
+
+        override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+        override fun onStopTrackingTouch(seekBar: SeekBar?)
+        {
+            chartUpdater.invoke(vm.getHRData().value!!, false)
+        }
+    }
 
     var HR_cb = object : (() -> Unit)
     {
@@ -391,6 +393,9 @@ class WatchComms : AppCompatActivity()
             chartView.reset()
             var ln = LineSet()
             var keys = sample.keys.sorted()
+            val scalar = (seekBar.progress.toFloat() / 1000f).toInt()
+
+            keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
 
             if(!keys.isEmpty())
             {
