@@ -97,7 +97,6 @@
                 android:src="@drawable/round_arrow_right_alt_black_18dp"
                 app:backgroundTint="@color/blueish"
                 app:elevation="10dp"
-                app:fabSize="auto"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/register_fab"
                 app:layout_constraintTop_toBottomOf="@+id/pass_box"
