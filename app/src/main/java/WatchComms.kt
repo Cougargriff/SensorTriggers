@@ -2,6 +2,7 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
@@ -167,6 +168,17 @@ class WatchComms : AppCompatActivity()
         }
 
         cal_fab.setOnClickListener {
+//            val datePickerDialog = DatePickerDialog(this)
+//            val calendar = Calendar.getInstance()
+//            calendar.timeInMillis = System.currentTimeMillis()
+//            datePickerDialog.datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+//                    calendar.get(Calendar.DAY_OF_MONTH), { datePicker, year, month, day->
+//                textView.text = "Year: "+ year + " Month: "+ (month+1) + " Day: "+day
+//            })
+//
+//            datePickerDialog.show()
+
+
 
         }
     }
@@ -283,13 +295,7 @@ class WatchComms : AppCompatActivity()
                         d.hr_radio.isChecked -> type = "h"
                     }
 
-                    val datePicker = DatePicker(this)
-                    val calendar = Calendar.getInstance()
-                    calendar.timeInMillis = System.currentTimeMillis()
-                    datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH), { datePicker, year, month, day->
-                        textView.text = "Year: "+ year + " Month: "+ (month+1) + " Day: "+day
-                    })
+
 
                     if(hr_edit.text.toString().compareTo("") == 0)
                     {
