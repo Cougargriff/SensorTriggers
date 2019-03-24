@@ -34,6 +34,7 @@
                 android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline1"
+                android:textColor="@android:color/white"
                 android:textSize="36sp"
                 app:layout_constraintBottom_toTopOf="@+id/recycler_view"
                 app:layout_constraintEnd_toEndOf="parent"

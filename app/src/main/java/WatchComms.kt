@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.util.Range
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -267,12 +268,12 @@ class WatchComms : AppCompatActivity()
         var type = "h"
         var v = LayoutInflater.from(this).inflate(R.layout.triggerdialog, null)
         v.geo_radio.setOnClickListener {
-            v.lat_long.visibility = View.VISIBLE
+            v.geo_options.visibility = View.VISIBLE
             v.hr.visibility = View.GONE
         }
 
         v.hr_radio.setOnClickListener {
-            v.lat_long.visibility = View.GONE
+            v.geo_options.visibility = View.GONE
             v.hr.visibility = View.VISIBLE
         }
 
@@ -404,8 +405,11 @@ class WatchComms : AppCompatActivity()
                 ln.setSmooth(true)
                 ln.setThickness(4f)
 
+
                 chartView.addData(ln)
                 chartView.setClickablePointRadius(10f)
+                
+
 
 
 

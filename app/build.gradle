@@ -50,6 +50,7 @@ dependencies {
     implementation 'com.github.nisrulz:sensey:1.8.0'
     implementation "android.arch.lifecycle:extensions:1.1.0"
     implementation "android.arch.lifecycle:viewmodel:1.1.0"
+    implementation 'com.bakhtiyor.gradients:gradients:0.1.0'
 
     implementation 'com.google.android.gms:play-services:12.0.1'
 

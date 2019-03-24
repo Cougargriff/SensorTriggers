@@ -3,6 +3,7 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.graphics.Color
+import android.graphics.PixelFormat
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -12,6 +13,7 @@ import android.view.animation.AccelerateInterpolator
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import co.revely.gradient.RevelyGradient
+import com.bakhtiyor.gradients.Gradients
 import kotlinx.android.synthetic.main.login_full.*
 import org.jetbrains.anko.*
 
@@ -123,11 +125,16 @@ class LoginActivity : AppCompatActivity()
         //window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
         window.statusBarColor = Color.parseColor("#4158D0")
 
+
+
+        window.setFormat(PixelFormat.RGBA_8888)
+
         RevelyGradient
-            .linear()
-            .angle(90f)
-            .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#000000")))
-            .onBackgroundOf(view)
+                .linear()
+                .angle(90f)
+                .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#ffffff")))
+                .onBackgroundOf(view)
+
 
         val valueanimator = ValueAnimator.ofFloat(0f, 1f)
         valueanimator.addUpdateListener {
