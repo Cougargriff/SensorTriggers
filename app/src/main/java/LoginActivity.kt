@@ -26,9 +26,6 @@ class LoginActivity : AppCompatActivity()
         styling()
         initialize()
         setButtonListeners()
-
-
-
     }
 
     fun setButtonListeners()

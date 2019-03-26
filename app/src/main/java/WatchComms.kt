@@ -55,7 +55,6 @@ class WatchComms : AppCompatActivity()
     lateinit var app : IQApp
     lateinit var userRef : DocumentReference
     lateinit var vm : ViewModel
-    private lateinit var fusedLocationClient : FusedLocationProviderClient
 
     var status = "OFF"
     var mAuth  = FirebaseAuth.getInstance()
@@ -122,8 +121,8 @@ class WatchComms : AppCompatActivity()
             vm.syncTriggers()
         })
 
-        seekBar.progress = 0
-        seekBar.setOnSeekBarChangeListener(seek_cb)
+//        seekBar.progress = 0
+//        seekBar.setOnSeekBarChangeListener(seek_cb)
     }
 
     fun loadingTimeout(duration: Long)
@@ -383,7 +382,7 @@ class WatchComms : AppCompatActivity()
             graphLoad.visibility = View.INVISIBLE
         }
     }
-    
+
 
     var chartUpdater  = object : ((HashMap<Int, Int>, Boolean) -> Unit)
     {
@@ -392,9 +391,9 @@ class WatchComms : AppCompatActivity()
             chartView.reset()
             var ln = LineSet()
             var keys = sample.keys.sorted()
-            val scalar = (seekBar.progress.toFloat() / 1000f).toInt()
-
-            keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
+//            val scalar = (seekBar.progress.toFloat() / 1000f).toInt()
+//
+//            keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
 
             if(!keys.isEmpty())
             {
@@ -411,9 +410,7 @@ class WatchComms : AppCompatActivity()
 
                 chartView.addData(ln)
                 chartView.setClickablePointRadius(10f)
-
-
-
+                
                 if(animate)
                 {
                     var anim = Animation()
