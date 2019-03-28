@@ -25,7 +25,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="98dp"
                 android:layout_marginBottom="8dp"
-                android:text="Create a Trigger"
+                android:text="Create Trigger"
                 android:textAlignment="center"
                 android:textColor="@color/blueish"
                 android:textSize="30sp"

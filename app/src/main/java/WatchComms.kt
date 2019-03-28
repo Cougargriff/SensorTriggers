@@ -2,11 +2,11 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.app.DatePickerDialog
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
+
 import android.content.pm.PackageManager
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
@@ -16,7 +16,6 @@ import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import com.db.chart.animation.Animation
 import com.db.chart.model.LineSet
@@ -25,8 +24,8 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.*
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -35,18 +34,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.triggerdialog.*
 import kotlinx.android.synthetic.main.triggerdialog.view.*
-import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
-import java.security.Permission
-import java.security.Permissions
 import java.util.*
-import java.util.jar.Manifest
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
 
 
-class WatchComms : AppCompatActivity()
+class WatchComms : AppCompatActivity(), OnMapReadyCallback
 {
     lateinit var connectiq : ConnectIQ
     lateinit var available : IQDevice
@@ -55,10 +50,27 @@ class WatchComms : AppCompatActivity()
     lateinit var app : IQApp
     lateinit var userRef : DocumentReference
     lateinit var vm : ViewModel
+    lateinit var map : GoogleMap
+
+
+
 
     var status = "OFF"
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
+
+    override fun onMapReady(p0: GoogleMap?) {
+
+        val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
+
+        map = p0!!
+        map.addMarker(MarkerOptions()
+                .title("Test location")
+                .position(boston))
+        map.moveCamera(CameraUpdateFactory.newLatLng(boston))
+    }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -67,11 +79,24 @@ class WatchComms : AppCompatActivity()
         styling()
         initialize()
 
+
+
         //checkPermissions(locationUpdates)
 
         uiUpdaters()
         setButtonListeners()
     }
+
+    // if i want to add map programatically
+//    fun setupMap()
+//    {
+//        val mMapFragment = MapFragment.newInstance()
+//        fragmentManager.beginTransaction()
+//            .add(R.id.map_base, mMapFragment)
+//            .commit()
+//
+//        mMapFragment.getMapAsync(this)
+//    }
 
     fun checkPermissions(cb : (Context) -> Unit)
     {
@@ -82,6 +107,7 @@ class WatchComms : AppCompatActivity()
             cb(this)
         }
     }
+
 
 
 
@@ -100,6 +126,7 @@ class WatchComms : AppCompatActivity()
     {
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
+
 
         loadingTimeout(5000)
 
@@ -143,8 +170,8 @@ class WatchComms : AppCompatActivity()
         transmit_button.setOnClickListener {
             when (status)
             {
-                "OFF" -> transmit("ON")
-                "ON" -> transmit("OFF")
+                "OFF" -> transmit_temporal("ON")
+                "ON" -> transmit_temporal("OFF")
             }
         }
 
@@ -166,20 +193,7 @@ class WatchComms : AppCompatActivity()
             startActivityForResult(intent, 1)
         }
 
-        cal_fab.setOnClickListener {
-//            val datePickerDialog = DatePickerDialog(this)
-//            val calendar = Calendar.getInstance()
-//            calendar.timeInMillis = System.currentTimeMillis()
-//            datePickerDialog.datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-//                    calendar.get(Calendar.DAY_OF_MONTH), { datePicker, year, month, day->
-//                textView.text = "Year: "+ year + " Month: "+ (month+1) + " Day: "+day
-//            })
-//
-//            datePickerDialog.show()
 
-
-
-        }
     }
 
     fun initializeRest()
@@ -267,13 +281,14 @@ class WatchComms : AppCompatActivity()
     {
         var type = "h"
         var v = LayoutInflater.from(this).inflate(R.layout.triggerdialog, null)
+
         v.geo_radio.setOnClickListener {
-            v.lat_long.visibility = View.VISIBLE
+            v.geo_options.visibility = View.VISIBLE
             v.hr.visibility = View.GONE
         }
 
         v.hr_radio.setOnClickListener {
-            v.lat_long.visibility = View.GONE
+            v.geo_options.visibility = View.GONE
             v.hr.visibility = View.VISIBLE
         }
 
@@ -295,7 +310,6 @@ class WatchComms : AppCompatActivity()
                     }
 
 
-
                     if(hr_edit.text.toString().compareTo("") == 0)
                     {
                         hr_edit.setText("-1")
@@ -303,7 +317,8 @@ class WatchComms : AppCompatActivity()
 
                     if(name_edit.text.length > 0)
                     {
-                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt() , true, type))
+                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt(),
+                                true, type, d.weather_chk.isChecked, d.location_chk.isChecked))
 
                         toast("New Trigger was added to application")
 
@@ -347,7 +362,7 @@ class WatchComms : AppCompatActivity()
         valueanimator.start()
     }
 
-    fun transmit(status : String)
+    fun transmit_temporal(status : String)
     {
         this.status = status
         connectiq.sendMessage(available, app, status, sendMessageCallback())

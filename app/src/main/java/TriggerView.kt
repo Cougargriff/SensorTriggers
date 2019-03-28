@@ -80,6 +80,8 @@ class TriggerView : AppCompatActivity() {
         trigger_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+
+        top_base.alpha = 0.5f
     }
 
 }
@@ -98,9 +100,16 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
         val item = myDataset[position]
-        holder.itemView.hr_num.text = item.hr_val.toString()
-        holder.itemView.trigger_name.text = item.name
 
+        when(item.hr_val)
+        {
+            -1 -> holder.itemView.hr_view.visibility = View.GONE
+            else -> {
+                holder.itemView.hr_num.text = item.hr_val.toString()
+            }
+        }
+
+        holder.itemView.trigger_name.text = item.name
 
 
         if(!myDataset[position].armed)
@@ -108,35 +117,61 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
             holder.itemView.chk_color.alpha = 0.3f
         }
 
+
         holder.itemView.title_view.setOnClickListener {
-                // TODO : progress view per lift once you click on item
-                myDataset[position].armed = !myDataset[position].armed
-
-                if(myDataset[position].armed)
-                {
-                    holder.itemView.chk_color.alpha = 1f
-                    holder.itemView.sub_item.visibility = View.VISIBLE
-                }
-                else
-                {
-                    holder.itemView.chk_color.alpha = 0.3f
-                    holder.itemView.sub_item.visibility = View.GONE
-                }
+            myDataset[position].armed = !myDataset[position].armed
+            setArmedColor(holder, position)
         }
 
 
-        if(myDataset[position].armed)
+        holder.itemView.expander.setOnClickListener {
+            when(holder.itemView.sub_item.visibility)
+            {
+                View.GONE -> holder.itemView.sub_item.visibility = View.VISIBLE
+                View.VISIBLE -> holder.itemView.sub_item.visibility = View.GONE
+            }
+        }
+
+
+        setArmedColor(holder, position)
+
+        if(item.location)
         {
-            holder.itemView.chk_color.alpha = 1f
-            holder.itemView.sub_item.visibility = View.VISIBLE
+            holder.itemView.location_switch.isChecked = true
         }
-        else
+
+        if(item.weather)
         {
-            holder.itemView.chk_color.alpha = 0.3f
-            holder.itemView.sub_item.visibility = View.GONE
+            holder.itemView.weather_switch.isChecked = true
         }
 
 
+        holder.itemView.weather_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            when(isChecked)
+            {
+                true -> item.weather = true
+                false -> item.weather = false
+            }
+        }
+
+        holder.itemView.location_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            when(isChecked)
+            {
+                true -> item.location = true
+                false -> item.location = false
+            }
+        }
+
+
+    }
+
+    private fun setArmedColor(holder : RecyclerView.ViewHolder, position: Int)
+    {
+        when(myDataset[position].armed)
+        {
+            true -> holder.itemView.chk_color.alpha = 1f
+            false -> holder.itemView.chk_color.alpha = 0.3f
+        }
     }
 
 

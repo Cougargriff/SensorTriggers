@@ -69,6 +69,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 toStore.put("threshold", t.hr_val)
                 toStore.put("armed", t.armed)
                 toStore.put("type", t.type)
+                toStore.put("weather", t.weather)
+                toStore.put("location", t.location)
                 userRef.collection("triggers").document(t.name)
                         .set(toStore, SetOptions.merge())
             }
@@ -154,7 +156,10 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
             val triggered = tSnap.get("armed")
             val type = tSnap.get("type")
-            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean, type as String))
+            val weather = tSnap.get("weather")
+            val location = tSnap.get("location")
+            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean, type as String,
+                    weather  as Boolean, location as Boolean))
         }
         return list
     }

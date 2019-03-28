@@ -7,7 +7,8 @@ import java.util.*
 
 
 @Parcelize
-data class Trigger(var name : String, var hr_val : Int, var armed : Boolean, var type : String) : Parcelable
+class Trigger(var name : String, var hr_val : Int, var armed : Boolean, var type : String,
+              var weather : Boolean, var location : Boolean) : Parcelable
 {
     // TODO : once a trigger threshold is met, it is turned off.
     // to avoid repeat hits
