@@ -24,11 +24,8 @@ import org.jetbrains.anko.toast
 
 class TriggerDialog : DialogFragment()
 {
-
     companion object
     {
-        private const val TAG = "LocationPickerDialog"
-
         private const val EXTRA_LAT = "lat"
         private const val EXTRA_LNG = "lng"
 
@@ -115,27 +112,20 @@ class TriggerDialog : DialogFragment()
         return dialog
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
+    {
         return customView
     }
 
-    override fun onStart() {
+    override fun onStart()
+    {
         super.onStart()
         pos_button.isEnabled = false
-
         val name_edit = dialog.findViewById<EditText>(R.id.trigger_name)
-
         name_edit.addTextChangedListener(object : TextWatcher
         {
-            override fun afterTextChanged(s: Editable?)
-            {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int)
-            {
-
-            }
-
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int)
             {
                 when(count)
@@ -143,12 +133,12 @@ class TriggerDialog : DialogFragment()
                     0 -> pos_button.isEnabled = false
                     else -> pos_button.isEnabled = true
                 }
-
             }
         })
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onActivityCreated(savedInstanceState: Bundle?)
+    {
         super.onActivityCreated(savedInstanceState)
         setStyle(DialogFragment.STYLE_NORMAL, R.style.MyDialogTheme)
 
@@ -167,18 +157,15 @@ class TriggerDialog : DialogFragment()
                 googleMap = map
 
                 map.setOnMapLoadedCallback {
-
                     val lat = arguments?.getDouble(EXTRA_LAT)
                     val lng = arguments?.getDouble(EXTRA_LNG)
 
-
-                    if (lat != null && lng != null) {
+                    if (lat != null && lng != null)
+                    {
                         val latLng = LatLng(lat, lng)
-
                         map.addMarker(MarkerOptions()
                                 .position(latLng)
                         )
-
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM))
 
                     }

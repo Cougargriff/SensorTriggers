@@ -6,11 +6,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 // Dark Sky Data classes used for GSON (json parsing)
-data class DarkResponse(var latitude : Double, var longitude : Double, var hourly : Hourly,
-                        var currently : Currently)
+data class DarkResponse(var latitude : Double, var longitude : Double, var hourly : Hourly, var currently : Currently)
 data class Hourly(var summary : String, var data : List<DataPoint>)
-data class Currently(var time : Int, var summary : String, var temperature : Double,
-                     var apparentTemperature : Double)
+data class Currently(var time : Int, var summary : String, var temperature : Double, var apparentTemperature : Double)
 data class DataPoint(var time : Int, var summary : String)
 
 object DarkSky
@@ -20,8 +18,7 @@ object DarkSky
 
     init
     {
-        endpoint = "https://api.darksky.net/forecast/" +
-            Resources.getResource("dark_key")
+        endpoint = "https://api.darksky.net/forecast/" + Resources.getResource("dark_key")
     }
 
     fun getWeatherHistory(time : Int, lat : Double, long : Double) : DarkResponse?
@@ -34,7 +31,6 @@ object DarkSky
                 .build()
 
         val response = client.newCall(request).execute()
-
         var darkReturn : DarkResponse?
         when(response.isSuccessful)
         {
@@ -45,9 +41,7 @@ object DarkSky
                 darkReturn = null
             }
         }
-
         return darkReturn
     }
-
 }
 
