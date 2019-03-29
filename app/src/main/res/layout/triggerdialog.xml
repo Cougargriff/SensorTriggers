@@ -111,14 +111,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView"
+        <FrameLayout
+            android:id="@+id/mapFrame"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="255dp"
+            android:layout_marginTop="7dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2" />
+            app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+        </FrameLayout>
+
+
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout

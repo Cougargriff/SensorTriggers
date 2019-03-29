@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/blueish</item>
     </style>
 
-    <style name="MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="MyDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:background">@color/login_color</item>
         <item name="android:dialogCornerRadius">15dp</item>
         <item name="colorAccent">@color/blueish</item>

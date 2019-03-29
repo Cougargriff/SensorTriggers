@@ -51,9 +51,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     lateinit var userRef : DocumentReference
     lateinit var vm : ViewModel
     lateinit var map : GoogleMap
-
-
-
+    lateinit var darkSky : DarkSky
 
     var status = "OFF"
     var mAuth  = FirebaseAuth.getInstance()
@@ -78,25 +76,10 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
 
         styling()
         initialize()
-
-
-
-        //checkPermissions(locationUpdates)
-
         uiUpdaters()
         setButtonListeners()
     }
 
-    // if i want to add map programatically
-//    fun setupMap()
-//    {
-//        val mMapFragment = MapFragment.newInstance()
-//        fragmentManager.beginTransaction()
-//            .add(R.id.map_base, mMapFragment)
-//            .commit()
-//
-//        mMapFragment.getMapAsync(this)
-//    }
 
     fun checkPermissions(cb : (Context) -> Unit)
     {
@@ -118,7 +101,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
         chartView = findViewById(R.id.chartView)
-
         graphLoad.isIndeterminate = true
     }
 
@@ -127,8 +109,9 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
-
         loadingTimeout(5000)
+
+        (supportFragmentManager.findFragmentById(R.id.mMap) as SupportMapFragment).getMapAsync(this)
 
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
         connectiq.initialize(this, true, connectListener())
@@ -148,8 +131,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             vm.syncTriggers()
         })
 
-//        seekBar.progress = 0
-//        seekBar.setOnSeekBarChangeListener(seek_cb)
+
     }
 
     fun loadingTimeout(duration: Long)
@@ -192,8 +174,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             intent.putExtra("triggers", vm.getTriggers().value)
             startActivityForResult(intent, 1)
         }
-
-
     }
 
     fun initializeRest()
@@ -235,9 +215,54 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         return false
     }
 
+
+
+    fun showTriggerCreationDialog()
+    {
+        val dialog = TriggerDialog.newInstance(44.00, 23.00)
+        dialog.show(supportFragmentManager, "trigger_dialog")
+    }
+
+
+
+    fun triggerFilter(sample : HashMap<Int, Int>)
+    {}
+
+    fun makeComponentsVisible()
+    {
+        transmit_button.alpha = 0f
+        sync_button.alpha = 0f
+
+        transmit_button.visibility = View.VISIBLE
+        sync_button.visibility = View.VISIBLE
+
+
+        val valueanimator = ValueAnimator.ofFloat(0f, 1f)
+        valueanimator.addUpdateListener {
+            val value = it.animatedValue as Float
+
+            transmit_button.alpha = value
+            sync_button.alpha = value
+        }
+        valueanimator.duration = 1400L
+        valueanimator.start()
+    }
+
+    fun transmit_temporal(status : String)
+    {
+        this.status = status
+        connectiq.sendMessage(available, app, status, sendMessageCallback())
+    }
+
+    fun transmit_string(status : String)
+    {
+        connectiq.sendMessage(available, app, status, sendMessageCallback())
+    }
+
     // *********************
     // Handling App Behavior
     // *********************
+
     override fun onBackPressed()
     {
         try
@@ -275,104 +300,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         mAuth.signOut()
     }
 
-    // *********************
-
-    fun showTriggerCreationDialog() // TODO dialog class maker?
-    {
-        var type = "h"
-        var v = LayoutInflater.from(this).inflate(R.layout.triggerdialog, null)
-
-        v.geo_radio.setOnClickListener {
-            v.geo_options.visibility = View.VISIBLE
-            v.hr.visibility = View.GONE
-        }
-
-        v.hr_radio.setOnClickListener {
-            v.geo_options.visibility = View.GONE
-            v.hr.visibility = View.VISIBLE
-        }
-
-
-        var builder = AlertDialog.Builder(this, R.style.MyDialogTheme)
-                .setCustomTitle(View.inflate(this, R.layout.custom_title, null))
-                .setView(v)
-                .setPositiveButton("Create") { dialog, _ ->
-                    val d = dialog as Dialog
-                    val hr_edit = d.findViewById<EditText>(R.id.hr)
-                    val name_edit = d.findViewById<EditText>(R.id.trigger_name)
-
-                    //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
-
-                    when
-                    {
-                        d.geo_radio.isChecked -> type = "g"
-                        d.hr_radio.isChecked -> type = "h"
-                    }
-
-
-                    if(hr_edit.text.toString().compareTo("") == 0)
-                    {
-                        hr_edit.setText("-1")
-                    }
-
-                    if(name_edit.text.length > 0)
-                    {
-                        vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt(),
-                                true, type, d.weather_chk.isChecked, d.location_chk.isChecked))
-
-                        toast("New Trigger was added to application")
-
-                        dialog.dismiss()
-                    }
-                    else
-                    {
-                        showTriggerCreationDialog()
-                    }
-               }
-                .setNegativeButton("Cancel") { dialog, which ->
-                    dialog.cancel()
-                }
-        builder.show()
-    }
-
-
-
-    fun triggerFilter(sample : HashMap<Int, Int>)
-    {
-
-    }
-
-    fun makeComponentsVisible()
-    {
-        transmit_button.alpha = 0f
-        sync_button.alpha = 0f
-
-        transmit_button.visibility = View.VISIBLE
-        sync_button.visibility = View.VISIBLE
-
-
-        val valueanimator = ValueAnimator.ofFloat(0f, 1f)
-        valueanimator.addUpdateListener {
-            val value = it.animatedValue as Float
-
-            transmit_button.alpha = value
-            sync_button.alpha = value
-        }
-        valueanimator.duration = 1400L
-        valueanimator.start()
-    }
-
-    fun transmit_temporal(status : String)
-    {
-        this.status = status
-        connectiq.sendMessage(available, app, status, sendMessageCallback())
-    }
-
-    fun transmit_string(status : String)
-    {
-        connectiq.sendMessage(available, app, status, sendMessageCallback())
-    }
-
 
     // ******************
     //  Function Objects
@@ -406,9 +333,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             chartView.reset()
             var ln = LineSet()
             var keys = sample.keys.sorted()
-//            val scalar = (seekBar.progress.toFloat() / 1000f).toInt()
-//
-//            keys = keys.subList(0, (keys.size - 1) - (scalar * keys.size) )
 
             if(!keys.isEmpty())
             {
@@ -525,5 +449,3 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
                 }
             }
 }
-
-
