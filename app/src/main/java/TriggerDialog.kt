@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
 import android.content.DialogInterface
+import android.content.res.Resources
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.text.Editable
@@ -15,8 +16,10 @@ import android.widget.Button
 import android.widget.EditText
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.triggerdialog.*
 import kotlinx.android.synthetic.main.triggerdialog.view.*
@@ -51,6 +54,8 @@ class TriggerDialog : DialogFragment()
     private val pos_button: Button by lazy {
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
     }
+
+
 
 
 
@@ -156,9 +161,25 @@ class TriggerDialog : DialogFragment()
             mapFragment.getMapAsync { map ->
                 googleMap = map
 
+                try
+                {
+                    // Customise the styling of the base map using a JSON object defined
+                    // in a raw resource file.
+                    val success = googleMap!!.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(
+                                    context, R.raw.map_style))
+
+                    if (!success) { }
+                }
+                catch (e : Resources.NotFoundException)
+                { }
+
+
                 map.setOnMapLoadedCallback {
                     val lat = arguments?.getDouble(EXTRA_LAT)
                     val lng = arguments?.getDouble(EXTRA_LNG)
+
+
 
                     if (lat != null && lng != null)
                     {

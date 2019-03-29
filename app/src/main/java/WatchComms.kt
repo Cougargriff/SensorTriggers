@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -26,6 +27,7 @@ import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.MapStyleOptions
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -62,10 +64,30 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
 
         map = p0!!
+
+        // TODO need to check permissions before setting my location
+
         map.addMarker(MarkerOptions()
                 .title("Test location")
                 .position(boston))
-        map.moveCamera(CameraUpdateFactory.newLatLng(boston))
+                .showInfoWindow()
+
+        try
+        {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_style))
+
+            if (!success) { }
+        }
+        catch (e : Resources.NotFoundException)
+        { }
+
+
+
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(boston, 15f))
     }
 
 
