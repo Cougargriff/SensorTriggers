@@ -27,6 +27,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         }
     }
 
+    private val DATE_FORMAT = "yyyy-MM-dd"
+
     fun getTriggers() : LiveData<ArrayList<Trigger>>
     {
         return triggers
@@ -65,14 +67,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         {
             for(t in triggers.value!!)
             {
-                var toStore = mutableMapOf<String, Any>()
-                toStore.put("threshold", t.hr_val)
-                toStore.put("armed", t.armed)
-                toStore.put("type", t.type)
-                toStore.put("weather", t.weather)
-                toStore.put("location", t.location)
                 userRef.collection("triggers").document(t.name)
-                        .set(toStore, SetOptions.merge())
+                        .set(t.toAnyMap(), SetOptions.merge())
             }
         }
         loadTriggers()
@@ -142,9 +138,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                     val t = getTriggersFromSnap(data!!)
                     triggers.value = t
                 }
-
             }
-
     }
 
     private fun getTriggersFromSnap(data : QuerySnapshot) : ArrayList<Trigger>
@@ -153,13 +147,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
         for(tSnap in data.documents)
         {
-            val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
-            val triggered = tSnap.get("armed")
-            val type = tSnap.get("type")
-            val weather = tSnap.get("weather")
-            val location = tSnap.get("location")
-            list.add(Trigger(tSnap.id, (thresh as Long).toInt(), triggered as Boolean, type as String,
-                    weather  as Boolean, location as Boolean))
+            list.add(Trigger.fromSnap(tSnap))
         }
         return list
     }
@@ -167,7 +155,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
     private fun getTimestamp() : String
     {
         return DateTimeFormatter
-            .ofPattern("yyyy-MM-dd")
+            .ofPattern(DATE_FORMAT)
             .withZone(ZoneOffset.UTC)
             .format(Instant.now())
     }

@@ -39,6 +39,7 @@ import kotlinx.android.synthetic.main.triggerdialog.view.*
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
 import java.util.*
+import java.util.jar.Manifest
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
 
@@ -59,6 +60,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
 
+    private val LOCATION_PERMS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
     override fun onMapReady(p0: GoogleMap?) {
 
         val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
@@ -67,10 +70,14 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
 
         // TODO need to check permissions before setting my location
 
+
+        checkPermissions {
+            map.isMyLocationEnabled = true
+        }
+
         map.addMarker(MarkerOptions()
                 .title("Test location")
                 .position(boston))
-                .showInfoWindow()
 
         try
         {
@@ -92,6 +99,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
 
 
 
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -103,13 +111,18 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     }
 
 
-    fun checkPermissions(cb : (Context) -> Unit)
+    fun checkPermissions(cb : (() -> Unit))
     {
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
-            cb(this)
+            requestPermissions(LOCATION_PERMS, 1)
+            cb()
+        }
+        else
+        {
+            cb()
         }
     }
 

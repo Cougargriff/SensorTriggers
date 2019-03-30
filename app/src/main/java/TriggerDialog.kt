@@ -3,10 +3,14 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.app.AlertDialog
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.DialogInterface
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Vibrator
 import android.support.v4.app.DialogFragment
+import android.support.v4.content.ContextCompat
+import android.support.v4.content.ContextCompat.getSystemService
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -18,12 +22,11 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.triggerdialog.*
 import kotlinx.android.synthetic.main.triggerdialog.view.*
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.withAlpha
 
 class TriggerDialog : DialogFragment()
 {
@@ -50,13 +53,11 @@ class TriggerDialog : DialogFragment()
     private var mapFragment: SupportMapFragment? = null
     private var googleMap: GoogleMap? = null
     lateinit var vm : ViewModel
+    private var geoFence : Circle? = null
 
     private val pos_button: Button by lazy {
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
     }
-
-
-
 
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
@@ -174,11 +175,9 @@ class TriggerDialog : DialogFragment()
                 catch (e : Resources.NotFoundException)
                 { }
 
-
                 map.setOnMapLoadedCallback {
                     val lat = arguments?.getDouble(EXTRA_LAT)
                     val lng = arguments?.getDouble(EXTRA_LNG)
-
 
 
                     if (lat != null && lng != null)
@@ -190,10 +189,21 @@ class TriggerDialog : DialogFragment()
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM))
 
                     }
+
+                    map.setOnMapLongClickListener {
+
+                        if(geoFence != null)
+                        {
+                            geoFence!!.remove()
+                        }
+                            geoFence = map.addCircle(CircleOptions()
+                                    .center(it)
+                                    .clickable(true)
+                                    .radius(100.0)
+                                    .fillColor(ContextCompat.getColor(context!!, R.color.blueish).withAlpha(99)))
+                    }
                 }
             }
         }
     }
-
-
 }

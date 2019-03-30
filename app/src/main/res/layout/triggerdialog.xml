@@ -91,11 +91,22 @@
         android:hint="Heart Rate Threshold"
         android:inputType="number" />
 
+    <EditText
+        android:id="@+id/geo_radius"
+        style="@style/Base.Widget.MaterialComponents.TextInputEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/blueish"
+        android:ems="10"
+        android:hint="Heart Rate Threshold"
+        android:inputType="number"
+        android:textColorHint="@color/blueish" />
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/geo_options"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TextView
             android:id="@+id/textView2"
