@@ -78,7 +78,6 @@ class TriggerDialog : DialogFragment()
 
         var type = "h"
 
-
         val builder = AlertDialog.Builder(context!!)
                 .setView(customView)
                 .setCustomTitle(View.inflate(context, R.layout.custom_title, null))
@@ -86,6 +85,7 @@ class TriggerDialog : DialogFragment()
                     val d = dialog as Dialog
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)
+
 
                     //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
 
@@ -151,7 +151,8 @@ class TriggerDialog : DialogFragment()
         // if onCreateView didn't return view
         // java.lang.IllegalStateException: Fragment does not have a view
         mapFragment = childFragmentManager.findFragmentByTag("m") as SupportMapFragment?
-        if (mapFragment == null) {
+        if (mapFragment == null)
+        {
             mapFragment = SupportMapFragment.newInstance()
             childFragmentManager.beginTransaction().replace(R.id.mapFrame, mapFragment!!, "map").commit()
         }
@@ -196,11 +197,11 @@ class TriggerDialog : DialogFragment()
                         {
                             geoFence!!.remove()
                         }
-                            geoFence = map.addCircle(CircleOptions()
-                                    .center(it)
-                                    .clickable(true)
-                                    .radius(100.0)
-                                    .fillColor(ContextCompat.getColor(context!!, R.color.blueish).withAlpha(99)))
+                        geoFence = map.addCircle(CircleOptions()
+                            .center(it)
+                            .clickable(true)
+                            .radius(100.0)
+                            .fillColor(ContextCompat.getColor(context!!, R.color.blueish).withAlpha(99)))
                     }
                 }
             }

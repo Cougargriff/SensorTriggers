@@ -87,26 +87,32 @@
         android:layout_height="wrap_content"
         android:textColorHint="@color/blueish"
         android:backgroundTint="@color/blueish"
+        android:textColor="@color/blueish"
         android:ems="10"
         android:hint="Heart Rate Threshold"
         android:inputType="number" />
 
-    <EditText
-        android:id="@+id/geo_radius"
-        style="@style/Base.Widget.MaterialComponents.TextInputEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/blueish"
-        android:ems="10"
-        android:hint="Heart Rate Threshold"
-        android:inputType="number"
-        android:textColorHint="@color/blueish" />
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/geo_options"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible">
+        android:layout_height="400dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/geo_radius"
+            style="@style/Base.Widget.MaterialComponents.TextInputEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/blueish"
+            android:textColor="@color/blueish"
+            android:ems="10"
+            android:hint="Fence Radius"
+            android:inputType="number"
+            android:textColorHint="@color/blueish"
+            app:layout_constraintBottom_toTopOf="@+id/mapFrame"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
         <TextView
             android:id="@+id/textView2"
@@ -125,12 +131,11 @@
         <FrameLayout
             android:id="@+id/mapFrame"
             android:layout_width="match_parent"
-            android:layout_height="255dp"
-            android:layout_marginTop="7dp"
+            android:layout_height="309dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView2">
+            app:layout_constraintTop_toBottomOf="@+id/geo_radius">
 
         </FrameLayout>
 
@@ -157,7 +162,7 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="50dp">
 
         <CheckBox
             android:id="@+id/weather_chk"
@@ -172,7 +177,7 @@
 
         <CheckBox
             android:id="@+id/location_chk"
-            android:layout_width="98dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:buttonTint="@color/blueish"
@@ -180,6 +185,18 @@
             android:textColor="@color/blueish"
             app:layout_constraintStart_toEndOf="@+id/weather_chk"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <CheckBox
+            android:id="@+id/hr_context_chk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:buttonTint="@color/blueish"
+            android:text="HR Context"
+            android:textColor="@color/blueish"
+            app:layout_constraintStart_toEndOf="@+id/location_chk"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </android.support.constraint.ConstraintLayout>
 
 

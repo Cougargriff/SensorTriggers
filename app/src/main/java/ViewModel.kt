@@ -21,6 +21,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             loadHR()
         }
     }
+
     private val triggers : MutableLiveData<ArrayList<Trigger>> by lazy {
         MutableLiveData<ArrayList<Trigger>>().also {
             loadTriggers()

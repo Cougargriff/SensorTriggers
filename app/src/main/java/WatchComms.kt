@@ -1,6 +1,7 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
@@ -60,8 +61,10 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
 
-    private val LOCATION_PERMS = arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    private val LOCATION_PERMS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
+
+    @SuppressLint("MissingPermission")
     override fun onMapReady(p0: GoogleMap?) {
 
         val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
@@ -229,7 +232,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     fun getAppInstance()
     {
         // app is initialized in callback appListener()
-        connectiq.getApplicationInfo("a3421fee-d289-106a-538c-b9547ab12095", available, appListener())
+        connectiq.getApplicationInfo(getString(R.string.watch_appID), available, appListener())
     }
 
     fun checkDevices() : Boolean
@@ -250,15 +253,11 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         return false
     }
 
-
-
     fun showTriggerCreationDialog()
     {
         val dialog = TriggerDialog.newInstance(44.00, 23.00)
         dialog.show(supportFragmentManager, "trigger_dialog")
     }
-
-
 
     fun triggerFilter(sample : HashMap<Int, Int>)
     {}
@@ -326,7 +325,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         try
         {
             connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
-
         }
         catch (e : UninitializedPropertyAccessException)
         {
@@ -405,82 +403,80 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     // *******************
 
     fun appEventListener() : ConnectIQ.IQApplicationEventListener =
-            object : ConnectIQ.IQApplicationEventListener
+        object : ConnectIQ.IQApplicationEventListener
+        {
+            override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?)
             {
-                override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?)
+                if(p3 == ConnectIQ.IQMessageStatus.SUCCESS)
                 {
-                    if(p3 == ConnectIQ.IQMessageStatus.SUCCESS)
+                    try
                     {
-                        try
-                        {
-                            val hash = p2!![0] as HashMap<Int, Int>
-                            vm.addNewHR(hash)
-                        }
-                        catch (e : ClassCastException)
-                        {
-                            Log.i("from phone", "tether request from watch")
-                        }
+                        val hash = p2!![0] as HashMap<Int, Int>
+                        vm.addNewHR(hash)
+                    }
+                    catch (e : ClassCastException)
+                    {
+                        Log.i("from phone", "tether request from watch")
                     }
                 }
             }
+        }
 
     fun sendMessageCallback() : ConnectIQ.IQSendMessageListener =
-            object : ConnectIQ.IQSendMessageListener
-            {
-                override fun onMessageStatus(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQMessageStatus?) {
-                    print("hellow")
-                }
+        object : ConnectIQ.IQSendMessageListener
+        {
+            override fun onMessageStatus(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQMessageStatus?) {
+                print("hellow")
             }
+        }
 
 
 
     fun appListener() : ConnectIQ.IQApplicationInfoListener =
-            object : ConnectIQ.IQApplicationInfoListener
+        object : ConnectIQ.IQApplicationInfoListener
+        {
+            override fun onApplicationInfoReceived(p0: IQApp?)
             {
-                override fun onApplicationInfoReceived(p0: IQApp?)
-                {
-                    app = p0!! // getting app instance
-                    connectiq.registerForAppEvents(available, app, appEventListener())
-                    makeComponentsVisible()
-                }
-
-                override fun onApplicationNotInstalled(p0: String?)
-                {
-                    //TODO("not implemented")
-                }
+                app = p0!! // getting app instance
+                connectiq.registerForAppEvents(available, app, appEventListener())
+                makeComponentsVisible()
             }
+
+            override fun onApplicationNotInstalled(p0: String?)
+            {
+                //TODO("not implemented")
+            }
+        }
 
 
 
     fun deviceListener() : ConnectIQ.IQDeviceEventListener =
-            object : ConnectIQ.IQDeviceEventListener
+        object : ConnectIQ.IQDeviceEventListener
+        {
+            override fun onDeviceStatusChanged(p0: IQDevice?, p1: IQDevice.IQDeviceStatus?)
             {
-                override fun onDeviceStatusChanged(p0: IQDevice?, p1: IQDevice.IQDeviceStatus?)
-                {
-                    // handle new device status
-                    // statuses -> CONNECTED, NOT_CONNECTED, NOT_PAIRED
-                }
+                // handle new device status
+                // statuses -> CONNECTED, NOT_CONNECTED, NOT_PAIRED
             }
-
-
+        }
 
     fun connectListener() : ConnectIQ.ConnectIQListener =
-            object : ConnectIQ.ConnectIQListener
+        object : ConnectIQ.ConnectIQListener
+        {
+            override fun onInitializeError(p0: ConnectIQ.IQSdkErrorStatus?)
             {
-                override fun onInitializeError(p0: ConnectIQ.IQSdkErrorStatus?)
-                {
-                    // A failure has occurred during initialization.  Inspect
-                    // the IQSdkErrorStatus value for more information regarding
-                    // the failure.
-                    toast("ERROR establishing connection")
-                }
-                override fun onSdkReady()
-                {
-                    initializeRest()
-                }
-                override fun onSdkShutDown()
-                {
-                   // TODO("not implemented")
-                }
+                // A failure has occurred during initialization.  Inspect
+                // the IQSdkErrorStatus value for more information regarding
+                // the failure.
+                toast("ERROR establishing connection")
             }
+            override fun onSdkReady()
+            {
+                initializeRest()
+            }
+            override fun onSdkShutDown()
+            {
+               // TODO("not implemented")
+            }
+        }
 }

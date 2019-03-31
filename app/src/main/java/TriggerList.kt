@@ -108,30 +108,19 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
                 holder.itemView.hr_num.text = item.hr_val.toString()
             }
         }
-
         holder.itemView.trigger_name.text = item.name
-
-
         if(!myDataset[position].armed)
         {
             holder.itemView.chk_color.alpha = 0.3f
         }
-
-
         holder.itemView.title_view.setOnClickListener {
             myDataset[position].armed = !myDataset[position].armed
             setArmedColor(holder, position)
         }
 
-
         holder.itemView.expander.setOnClickListener {
-            when(holder.itemView.sub_item.visibility)
-            {
-                View.GONE -> holder.itemView.sub_item.visibility = View.VISIBLE
-                View.VISIBLE -> holder.itemView.sub_item.visibility = View.GONE
-            }
+            onExpand(holder, position)
         }
-
 
         setArmedColor(holder, position)
 
@@ -143,6 +132,11 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         if(item.weather)
         {
             holder.itemView.weather_switch.isChecked = true
+        }
+
+        if(item.hr_context)
+        {
+
         }
 
 
@@ -161,8 +155,22 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
                 false -> item.location = false
             }
         }
+    }
 
-
+    private fun onExpand(holder : RecyclerView.ViewHolder, position : Int)
+    {
+        when(holder.itemView.sub_item.visibility)
+        {
+            View.GONE -> {
+                holder.itemView.sub_item.visibility = View.VISIBLE
+                when(myDataset[position].type)
+                {
+                    "h" -> {}
+                    "g" -> { } // TODO add mapfrag to map_frame ...
+                }
+            }
+            View.VISIBLE -> holder.itemView.sub_item.visibility = View.GONE
+        }
     }
 
     private fun setArmedColor(holder : RecyclerView.ViewHolder, position: Int)
