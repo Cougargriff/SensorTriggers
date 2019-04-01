@@ -109,35 +109,22 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
             }
         }
         holder.itemView.trigger_name.text = item.name
-        if(!myDataset[position].armed)
+        if(!item.armed)
         {
             holder.itemView.chk_color.alpha = 0.3f
         }
+
         holder.itemView.title_view.setOnClickListener {
-            myDataset[position].armed = !myDataset[position].armed
-            setArmedColor(holder, position)
+            item.armed = !item.armed
+            setArmedColor(holder, item)
         }
 
         holder.itemView.expander.setOnClickListener {
-            onExpand(holder, position)
+            onExpand(holder, item)
         }
 
-        setArmedColor(holder, position)
-
-        if(item.location)
-        {
-            holder.itemView.location_switch.isChecked = true
-        }
-
-        if(item.weather)
-        {
-            holder.itemView.weather_switch.isChecked = true
-        }
-
-        if(item.hr_context)
-        {
-
-        }
+        setArmedColor(holder, item)
+        configureSwitches(holder, item)
 
 
         holder.itemView.weather_switch.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -157,13 +144,32 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         }
     }
 
-    private fun onExpand(holder : RecyclerView.ViewHolder, position : Int)
+
+    private fun configureSwitches(holder: RecyclerView.ViewHolder, item : Trigger)
+    {
+        if(item.location)
+        {
+            holder.itemView.location_switch.isChecked = true
+        }
+
+        if(item.weather)
+        {
+            holder.itemView.weather_switch.isChecked = true
+        }
+
+        if(item.hr_context)
+        {
+            holder.itemView.hr_context_switch.isChecked = true
+        }
+    }
+
+    private fun onExpand(holder : RecyclerView.ViewHolder, item : Trigger)
     {
         when(holder.itemView.sub_item.visibility)
         {
             View.GONE -> {
                 holder.itemView.sub_item.visibility = View.VISIBLE
-                when(myDataset[position].type)
+                when(item.type)
                 {
                     "h" -> {}
                     "g" -> { } // TODO add mapfrag to map_frame ...
@@ -173,9 +179,9 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         }
     }
 
-    private fun setArmedColor(holder : RecyclerView.ViewHolder, position: Int)
+    private fun setArmedColor(holder : RecyclerView.ViewHolder, item: Trigger)
     {
-        when(myDataset[position].armed)
+        when(item.armed)
         {
             true -> holder.itemView.chk_color.alpha = 1f
             false -> holder.itemView.chk_color.alpha = 0.3f

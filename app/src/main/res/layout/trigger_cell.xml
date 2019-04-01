@@ -103,7 +103,7 @@
         android:layout_width="match_parent"
         android:layout_height="237dp"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
