@@ -79,7 +79,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
 
         map = p0!!
-
         // TODO need to check permissions before setting my location
 
 
@@ -109,8 +108,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     }
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -136,8 +133,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             cb(true)
         }
     }
-
-
 
 
     fun styling()

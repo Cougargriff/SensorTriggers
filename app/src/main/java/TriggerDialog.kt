@@ -66,6 +66,9 @@ class TriggerDialog : DialogFragment()
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
     }
 
+    private val fence_input : EditText by lazy {
+        (dialog as AlertDialog).geo_radius
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
     {
@@ -84,7 +87,6 @@ class TriggerDialog : DialogFragment()
         }
 
         var type = "h"
-
         val builder = AlertDialog.Builder(context!!)
                 .setView(customView)
                 .setCustomTitle(View.inflate(context, R.layout.custom_title, null))

@@ -96,7 +96,7 @@
         android:id="@+id/geo_options"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <EditText
             android:id="@+id/geo_radius"
@@ -104,10 +104,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/blueish"
-            android:textColor="@color/blueish"
             android:ems="10"
             android:hint="Fence Radius"
             android:inputType="number"
+            android:text="99"
+            android:textColor="@color/blueish"
             android:textColorHint="@color/blueish"
             app:layout_constraintBottom_toTopOf="@+id/mapFrame"
             app:layout_constraintEnd_toEndOf="parent"
