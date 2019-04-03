@@ -96,7 +96,7 @@
         android:id="@+id/geo_options"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <EditText
             android:id="@+id/geo_radius"

@@ -46,7 +46,7 @@ class Trigger(var name : String, var hr_val : Int, var armed : Boolean, var type
             val lat = tSnap.get("latitude") as Double
             val long = tSnap.get("longitude") as Double
             val hr_context = tSnap.get("hr_context") as Boolean
-            val time = tSnap.get("time_triggered") as Int
+            val time = (tSnap.get("time_triggered") as Long).toInt()
 
             return Trigger(tSnap.id, thresh, triggered, type, weather, location, lat, long, hr_context, time)
         }

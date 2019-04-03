@@ -77,6 +77,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     override fun onMapReady(p0: GoogleMap?) {
 
         val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
+        var myLocation = LatLng(0.0, 0.0)
 
         map = p0!!
         // TODO need to check permissions before setting my location
@@ -84,27 +85,37 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
 
         if(perm_granted) {
             map.isMyLocationEnabled = true
+            fusedLocation.lastLocation.addOnSuccessListener {
+                val l = LatLng(it!!.latitude, it!!.longitude)
+                myLocation = l
+
+
+            try
+            {
+                // Customise the styling of the base map using a JSON object defined
+                // in a raw resource file.
+                val success = map.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                                this, R.raw.map_style))
+
+                if (!success) { }
+            }
+            catch (e : Resources.NotFoundException)
+            { }
+
+
+
+
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
+
+
+
+
+
+            }
         }
 
-        map.addMarker(MarkerOptions()
-                .title("Test location")
-                .position(boston))
 
-        try
-        {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
-            val success = map.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                            this, R.raw.map_style))
-
-            if (!success) { }
-        }
-        catch (e : Resources.NotFoundException)
-        { }
-
-
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(, 15f))
     }
 
 
@@ -262,10 +273,20 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         return false
     }
 
+    @SuppressLint("MissingPermission")
     fun showTriggerCreationDialog()
     {
-        val dialog = TriggerDialog.newInstance(44.00, 23.00)
-        dialog.show(supportFragmentManager, "trigger_dialog")
+        var lat = 0.0
+        var long = 0.0
+
+        fusedLocation.lastLocation.addOnSuccessListener {
+            lat = it!!.latitude
+            long = it!!.longitude
+            val dialog = TriggerDialog.newInstance(lat, long)
+            dialog.show(supportFragmentManager, "trigger_dialog")
+        }
+
+
     }
 
     fun triggerFilter(sample : HashMap<Int, Int>)

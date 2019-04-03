@@ -1,5 +1,6 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
@@ -57,10 +58,7 @@ class TriggerDialog : DialogFragment()
     lateinit var vm : ViewModel
     private var geoFence : Circle? = null
     private var geoFenceLoc : LatLng? = null
-    private val locationCheckBox : Boolean? = null
-    private val fusedLocation : FusedLocationProviderClient by lazy {
-        LocationServices.getFusedLocationProviderClient(context!!)
-    }
+
 
     private val pos_button: Button by lazy {
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
@@ -94,9 +92,6 @@ class TriggerDialog : DialogFragment()
                     val d = dialog as Dialog
                     val hr_edit = d.findViewById<EditText>(R.id.hr)
                     val name_edit = d.findViewById<EditText>(R.id.trigger_name)
-
-
-                    //val radioG = d.findViewById<RadioGroup>(R.id.r_group)
 
                     when
                     {
@@ -176,6 +171,7 @@ class TriggerDialog : DialogFragment()
         })
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActivityCreated(savedInstanceState: Bundle?)
     {
         super.onActivityCreated(savedInstanceState)
@@ -220,6 +216,8 @@ class TriggerDialog : DialogFragment()
                         map.addMarker(MarkerOptions()
                                 .position(latLng)
                         )
+
+
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM))
                         map.isMyLocationEnabled = true
                     }
@@ -238,12 +236,7 @@ class TriggerDialog : DialogFragment()
                             .radius(100.0)
                             .fillColor(ContextCompat.getColor(context!!, R.color.blueish).withAlpha(99)))
 
-                        fusedLocation.lastLocation.addOnSuccessListener {
-                            val l = LatLng(it!!.latitude, it!!.longitude)
-                            geoFenceLoc = l
-                        }
-
-                        // todo set geofenceLoc to current location
+                        geoFenceLoc = LatLng(it.latitude, it.longitude)
                     }
                 }
             }

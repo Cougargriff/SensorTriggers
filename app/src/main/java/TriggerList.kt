@@ -142,6 +142,16 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
                 false -> item.location = false
             }
         }
+
+        holder.itemView.hr_context_switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            when(isChecked)
+            {
+                true -> item.hr_context = true
+                false -> item.hr_context = false
+            }
+        }
+
+
     }
 
 
