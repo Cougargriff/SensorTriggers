@@ -125,6 +125,25 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
 
         setArmedColor(holder, item)
         configureSwitches(holder, item)
+    }
+
+
+    private fun configureSwitches(holder: RecyclerView.ViewHolder, item : Trigger)
+    {
+        if(item.location)
+        {
+            holder.itemView.location_switch.isChecked = true
+        }
+
+        if(item.weather)
+        {
+            holder.itemView.weather_switch.isChecked = true
+        }
+
+        if(item.hr_context)
+        {
+            holder.itemView.hr_context_switch.isChecked = true
+        }
 
 
         holder.itemView.weather_switch.setOnCheckedChangeListener { buttonView, isChecked ->
@@ -149,27 +168,6 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
                 true -> item.hr_context = true
                 false -> item.hr_context = false
             }
-        }
-
-
-    }
-
-
-    private fun configureSwitches(holder: RecyclerView.ViewHolder, item : Trigger)
-    {
-        if(item.location)
-        {
-            holder.itemView.location_switch.isChecked = true
-        }
-
-        if(item.weather)
-        {
-            holder.itemView.weather_switch.isChecked = true
-        }
-
-        if(item.hr_context)
-        {
-            holder.itemView.hr_context_switch.isChecked = true
         }
     }
 
