@@ -26,8 +26,13 @@ import com.db.chart.view.LineChartView
 import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 
 import com.google.firebase.auth.FirebaseAuth
@@ -56,10 +61,14 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     lateinit var vm : ViewModel
     lateinit var map : GoogleMap
     lateinit var darkSky : DarkSky
+    private val fusedLocation : FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(this)
+    }
 
     var status = "OFF"
     var mAuth  = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
+    var perm_granted = false
 
     private val LOCATION_PERMS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -74,7 +83,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         // TODO need to check permissions before setting my location
 
 
-        checkPermissions {
+        if(perm_granted) {
             map.isMyLocationEnabled = true
         }
 
@@ -96,8 +105,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         { }
 
 
-
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(boston, 15f))
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(, 15f))
     }
 
 
@@ -114,18 +122,18 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     }
 
 
-    fun checkPermissions(cb : (() -> Unit))
+    fun checkPermissions(cb : ((b : Boolean) -> Unit))
     {
         if ( Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             requestPermissions(LOCATION_PERMS, 1)
-            cb()
+            cb(true)
         }
         else
         {
-            cb()
+            cb(true)
         }
     }
 
@@ -147,7 +155,13 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
+        checkPermissions {
+            perm_granted = true
+        }
+
         loadingTimeout(5000)
+
+        //fusedLocation.requestLocationUpdates(LocationRequest(), object : LocationCallback)
 
         (supportFragmentManager.findFragmentById(R.id.mMap) as SupportMapFragment).getMapAsync(this)
 

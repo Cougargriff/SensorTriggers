@@ -1,10 +1,12 @@
 package com.senstrgrs.griffinjohnson.sensortriggers
 
+import android.app.Dialog
 import android.os.Parcelable
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.type.LatLng
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
+import kotlinx.android.synthetic.main.triggerdialog.*
 import java.util.*
 
 
@@ -48,5 +50,7 @@ class Trigger(var name : String, var hr_val : Int, var armed : Boolean, var type
 
             return Trigger(tSnap.id, thresh, triggered, type, weather, location, lat, long, hr_context, time)
         }
+
+
     }
 }

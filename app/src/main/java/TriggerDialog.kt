@@ -18,6 +18,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -54,6 +56,11 @@ class TriggerDialog : DialogFragment()
     private var googleMap: GoogleMap? = null
     lateinit var vm : ViewModel
     private var geoFence : Circle? = null
+    private var geoFenceLoc : LatLng? = null
+    private val locationCheckBox : Boolean? = null
+    private val fusedLocation : FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(context!!)
+    }
 
     private val pos_button: Button by lazy {
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
@@ -101,9 +108,30 @@ class TriggerDialog : DialogFragment()
                         hr_edit.setText("-1")
                     }
 
+                    val name = name_edit.text.toString()
+                    val hr = hr_edit.text.toString().toInt()
+                    val armed = true
+                    val weather = d.weather_chk.isChecked
+                    val location = d.location_chk.isChecked
+                    val hr_context = d.hr_context_chk.isChecked
+                    var lat : Double
+                    var long : Double
+                    // Get user location
 
-                    vm.addTrigger(Trigger(name_edit.text.toString(), hr_edit.text.toString().toInt(),
-                            true, type, d.weather_chk.isChecked, d.location_chk.isChecked))
+                    if(location && geoFence != null)
+                    {
+                        lat = geoFenceLoc!!.latitude
+                        long = geoFenceLoc!!.longitude
+                    }
+                    else
+                    {
+                        lat = -1.0
+                        long = -1.0
+                    }
+
+                    val t = Trigger(name, hr, armed, type, weather, location, lat, long, hr_context)
+
+                    vm.addTrigger(t)
 
                     dialog.dismiss()
                 }
@@ -126,8 +154,11 @@ class TriggerDialog : DialogFragment()
     override fun onStart()
     {
         super.onStart()
-        pos_button.isEnabled = false
         val name_edit = dialog.findViewById<EditText>(R.id.trigger_name)
+        pos_button.isEnabled = false
+
+
+
         name_edit.addTextChangedListener(object : TextWatcher
         {
             override fun afterTextChanged(s: Editable?) {}
@@ -188,7 +219,7 @@ class TriggerDialog : DialogFragment()
                                 .position(latLng)
                         )
                         map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM))
-
+                        map.isMyLocationEnabled = true
                     }
 
                     map.setOnMapLongClickListener {
@@ -196,12 +227,21 @@ class TriggerDialog : DialogFragment()
                         if(geoFence != null)
                         {
                             geoFence!!.remove()
+                            geoFenceLoc = null
                         }
+
                         geoFence = map.addCircle(CircleOptions()
                             .center(it)
                             .clickable(true)
                             .radius(100.0)
                             .fillColor(ContextCompat.getColor(context!!, R.color.blueish).withAlpha(99)))
+
+                        fusedLocation.lastLocation.addOnSuccessListener {
+                            val l = LatLng(it!!.latitude, it!!.longitude)
+                            geoFenceLoc = l
+                        }
+
+                        // todo set geofenceLoc to current location
                     }
                 }
             }
