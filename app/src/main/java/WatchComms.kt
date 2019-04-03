@@ -5,11 +5,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.location.Location
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -17,6 +19,9 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.LayoutInflater
+
+import android.content.ServiceConnection
+import android.os.IBinder
 import android.view.View
 import android.widget.*
 import com.db.chart.animation.Animation
@@ -38,6 +43,12 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import kotlinx.android.synthetic.main.triggerdialog.*
@@ -52,15 +63,20 @@ import kotlin.concurrent.timerTask
 
 class WatchComms : AppCompatActivity(), OnMapReadyCallback
 {
-    lateinit var connectiq : ConnectIQ
-    lateinit var available : IQDevice
-    lateinit var paired : List<IQDevice>
-    lateinit var chartView : LineChartView
-    lateinit var app : IQApp
-    lateinit var userRef : DocumentReference
-    lateinit var vm : ViewModel
-    lateinit var map : GoogleMap
-    lateinit var darkSky : DarkSky
+    private lateinit var connectiq : ConnectIQ
+    private lateinit var available : IQDevice
+    private lateinit var paired : List<IQDevice>
+    private lateinit var chartView : LineChartView
+    private lateinit var app : IQApp
+    private lateinit var userRef : DocumentReference
+    private lateinit var vm : ViewModel
+    private lateinit var map : GoogleMap
+    private lateinit var darkSky : DarkSky
+    private var gpsService : LocationTrackService? = null
+
+    private val LOCATION_PERMS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+
     private val fusedLocation : FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(this)
     }
@@ -70,51 +86,47 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     var db = FirebaseFirestore.getInstance()
     var perm_granted = false
 
-    private val LOCATION_PERMS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
 
     @SuppressLint("MissingPermission")
     override fun onMapReady(p0: GoogleMap?) {
 
-        val boston = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
-        var myLocation = LatLng(0.0, 0.0)
+        val BOSTON = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
+
+        var myLocation : LatLng
 
         map = p0!!
-        // TODO need to check permissions before setting my location
 
+        checkPermissions {
+            perm_granted = it!!
 
-        if(perm_granted) {
-            map.isMyLocationEnabled = true
-            fusedLocation.lastLocation.addOnSuccessListener {
-                val l = LatLng(it!!.latitude, it!!.longitude)
-                myLocation = l
+            map.isMyLocationEnabled = perm_granted
 
-
-            try
+            if(perm_granted)
             {
-                // Customise the styling of the base map using a JSON object defined
-                // in a raw resource file.
-                val success = map.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                                this, R.raw.map_style))
-
-                if (!success) { }
-            }
-            catch (e : Resources.NotFoundException)
-            { }
+                fusedLocation.lastLocation.addOnSuccessListener {
+                    val l = LatLng(it!!.latitude, it!!.longitude)
+                    myLocation = l
 
 
+                    try
+                    {
+                        // Customise the styling of the base map using a JSON object defined
+                        // in a raw resource file.
+                        val success = map.setMapStyle(
+                                MapStyleOptions.loadRawResourceStyle(
+                                        this, R.raw.map_style))
 
+                        if (!success) { }
+                    }
+                    catch (e : Resources.NotFoundException)
+                    { }
 
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
 
-
-
-
-
+                }
             }
         }
-
 
     }
 
@@ -125,26 +137,60 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
 
         styling()
         initialize()
+
+        startBackgroundService()
+
         uiUpdaters()
         setButtonListeners()
+    }
+
+    fun startBackgroundService()
+    {
+        val intent = Intent(this.application, LocationTrackService::class.java)
+        this.application.startService(intent)
+        this.application.bindService(intent, serviceConnection(), Context.BIND_AUTO_CREATE)
+    }
+
+    private fun serviceConnection() = object : ServiceConnection
+    {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?)
+        {
+            if(name!!.className.endsWith("LocationTrackService"))
+            {
+                gpsService = (service as LocationTrackService.LocationServiceBinder).getService()
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?)
+        {
+            if(name!!.className.equals("LocationTrackService"))
+            {
+                gpsService = null
+            }
+        }
     }
 
 
     fun checkPermissions(cb : ((b : Boolean) -> Unit))
     {
-        if ( Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            requestPermissions(LOCATION_PERMS, 1)
-            cb(true)
-        }
-        else
-        {
-            cb(true)
-        }
-    }
+        Dexter.withActivity(this)
+            .withPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            .withListener(object : PermissionListener {
+                override fun onPermissionDenied(response: PermissionDeniedResponse?)
+                {
+                    cb(false)
+                }
 
+                override fun onPermissionGranted(response: PermissionGrantedResponse?)
+                {
+                    cb(true)
+                }
+
+                override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?)
+                {
+                }
+            })
+    }
 
     fun styling()
     {
@@ -160,10 +206,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
     {
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
-
-        checkPermissions {
-            perm_granted = true
-        }
 
         loadingTimeout(5000)
 
@@ -460,8 +502,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             }
         }
 
-
-
     fun appListener() : ConnectIQ.IQApplicationInfoListener =
         object : ConnectIQ.IQApplicationInfoListener
         {
@@ -477,8 +517,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
                 //TODO("not implemented")
             }
         }
-
-
 
     fun deviceListener() : ConnectIQ.IQDeviceEventListener =
         object : ConnectIQ.IQDeviceEventListener
