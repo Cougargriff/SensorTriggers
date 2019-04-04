@@ -88,6 +88,11 @@ class LocationTrackService : Service()
 
     }
 
+    fun stopTracking()
+    {
+        this.onDestroy()
+    }
+
     private class LocationListener(provider: String) : android.location.LocationListener
     {
         private val lastLocation: Location? = null

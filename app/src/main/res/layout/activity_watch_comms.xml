@@ -11,6 +11,25 @@
     tools:context=".WatchComms">
 
     <Button
+        android:id="@+id/track_btn"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="17dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/roundshapebtn"
+        android:backgroundTint="@color/login_color"
+        android:backgroundTintMode="src_over"
+        android:clickable="true"
+        android:elevation="13dp"
+        android:text="Track Me"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintStart_toEndOf="@+id/addTrigger"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+    <Button
         android:id="@+id/viewTriggers"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="0dp"

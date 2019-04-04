@@ -3,22 +3,16 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 
-import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.location.Location
-import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
 import android.util.Log
-import android.view.LayoutInflater
 
 import android.content.ServiceConnection
 import android.os.IBinder
@@ -32,10 +26,7 @@ import com.garmin.android.connectiq.ConnectIQ
 import com.garmin.android.connectiq.IQApp
 import com.garmin.android.connectiq.IQDevice
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -51,12 +42,9 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
-import kotlinx.android.synthetic.main.triggerdialog.*
-import kotlinx.android.synthetic.main.triggerdialog.view.*
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
 import java.util.*
-import java.util.jar.Manifest
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
 
@@ -158,6 +146,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             if(name!!.className.endsWith("LocationTrackService"))
             {
                 gpsService = (service as LocationTrackService.LocationServiceBinder).getService()
+                track_btn.visibility = View.VISIBLE
             }
         }
 
@@ -166,6 +155,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             if(name!!.className.equals("LocationTrackService"))
             {
                 gpsService = null
+                track_btn.visibility = View.GONE
             }
         }
     }
@@ -274,9 +264,25 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             intent.putExtra("triggers", vm.getTriggers().value)
             startActivityForResult(intent, 1)
         }
+
+
+        var isTracking = false
+        track_btn.setOnClickListener {
+            when(isTracking)
+            {
+                true -> {
+                    gpsService!!.stopTracking()
+                }
+                false -> {
+                    gpsService!!.startTracking()
+                }
+            }
+            isTracking = !isTracking
+
+        }
     }
 
-    fun initializeRest()
+    fun initializeAfterSDKReady()
     {
         if(!checkDevices())
         {
@@ -540,7 +546,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
             }
             override fun onSdkReady()
             {
-                initializeRest()
+                initializeAfterSDKReady()
             }
             override fun onSdkShutDown()
             {
