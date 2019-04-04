@@ -2,8 +2,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/triggerDialog"
-    android:layout_width="400dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/dk_gray"
     android:orientation="vertical">
 
     <android.support.constraint.ConstraintLayout
@@ -19,7 +20,7 @@
             android:text="Type"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            android:textColor="@color/blueish"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -48,10 +49,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="3dp"
-                android:buttonTint="@color/blueish"
+                android:buttonTint="@color/white"
                 android:checked="true"
                 android:text="HR"
-                android:textColor="@color/blueish" />
+                android:textColor="@color/white" />
 
             <RadioButton
                 android:id="@+id/geo_radio"
@@ -59,9 +60,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
-                android:buttonTint="@color/blueish"
+                android:buttonTint="@color/white"
                 android:text="GeoFence"
-                android:textColor="@color/blueish"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toEndOf="@+id/hr_radio"
                 tools:layout_editor_absoluteY="3dp" />
 
@@ -74,23 +75,23 @@
         style="@style/Base.Widget.MaterialComponents.TextInputEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
         android:hint="Name"
         android:inputType="text"
-        android:textColorHint="@color/blueish"
-        android:backgroundTint="@color/blueish"
-        android:textColor="@color/blueish" />
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
 
     <EditText
         android:id="@+id/hr"
         style="@style/Base.Widget.MaterialComponents.TextInputEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="@color/blueish"
-        android:backgroundTint="@color/blueish"
-        android:textColor="@color/blueish"
+        android:backgroundTint="@color/white"
         android:ems="10"
         android:hint="Heart Rate Threshold"
-        android:inputType="number" />
+        android:inputType="number"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/geo_options"
@@ -103,13 +104,13 @@
             style="@style/Base.Widget.MaterialComponents.TextInputEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/blueish"
+            android:backgroundTint="@color/white"
             android:ems="10"
             android:hint="Fence Radius"
             android:inputType="number"
             android:text="99"
-            android:textColor="@color/blueish"
-            android:textColorHint="@color/blueish"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/mapFrame"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -124,7 +125,7 @@
             android:text="Geo Options"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            android:textColor="@color/blueish"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -144,8 +145,10 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/stamp_base"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/dk_gray">
 
         <TextView
             android:layout_width="123dp"
@@ -155,24 +158,26 @@
             android:text="Data Stamp"
             android:textAlignment="center"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            android:textColor="@color/blueish"
+            android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/stamp_beneath"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:background="@color/dk_gray">
 
         <CheckBox
             android:id="@+id/weather_chk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="3dp"
-            android:buttonTint="@color/blueish"
+            android:buttonTint="@color/white"
             android:text="Weather"
-            android:textColor="@color/blueish"
+            android:textColor="@color/white"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -181,9 +186,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:buttonTint="@color/blueish"
+            android:buttonTint="@color/white"
             android:text="Location"
-            android:textColor="@color/blueish"
+            android:textColor="@color/white"
             app:layout_constraintStart_toEndOf="@+id/weather_chk"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -192,9 +197,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:buttonTint="@color/blueish"
+            android:buttonTint="@color/white"
             android:text="HR Context"
-            android:textColor="@color/blueish"
+            android:textAlignment="center"
+            android:textColor="@color/white"
             app:layout_constraintStart_toEndOf="@+id/location_chk"
             app:layout_constraintTop_toTopOf="parent" />
 

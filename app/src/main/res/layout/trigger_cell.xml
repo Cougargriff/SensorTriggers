@@ -15,7 +15,7 @@
         android:layout_marginEnd="3dp"
         android:layout_marginBottom="3dp"
         android:visibility="visible"
-        app:cardBackgroundColor="@color/login_color"
+        app:cardBackgroundColor="@color/white"
         app:cardCornerRadius="5dp"
         app:cardElevation="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -88,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="9dp"
-                android:background="@color/login_color"
+                android:background="@color/white"
                 android:contentDescription="TODO"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -112,7 +112,7 @@
             android:layout_marginEnd="3dp"
             android:layout_marginBottom="3dp"
             android:layout_weight="1"
-            app:cardBackgroundColor="@color/login_color"
+            app:cardBackgroundColor="@color/white"
             app:cardCornerRadius="5dp"
             app:cardElevation="0dp">
 

@@ -2,9 +2,12 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 
 import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v4.app.FragmentManager
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.ContextCompat.getColor
 import android.support.v4.content.res.ResourcesCompat
@@ -23,6 +26,9 @@ import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
 import android.support.v7.widget.SimpleItemAnimator
 import com.google.android.gms.common.api.ResolvingResultCallbacks
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.Circle
 import com.google.common.io.Resources
 
 
@@ -64,7 +70,7 @@ class TriggerView : AppCompatActivity() {
         // create classes to manage recycler view
         recyclerView = recycler_view
         recycler_view_manager = LinearLayoutManager(this)
-        recycler_viewAdapter = MyListAdapter(trigger_list)
+        recycler_viewAdapter = MyListAdapter(trigger_list, this)
 
         recyclerView.setHasFixedSize(true)
 
@@ -85,13 +91,20 @@ class TriggerView : AppCompatActivity() {
         window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.black)
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.black)
 
-        top_base.alpha = 0.5f
     }
 
 }
 
-class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
+    private var context : Context? = null
+    private var mapFragment: SupportMapFragment? = null
+    private var googleMap: GoogleMap? = null
+    private var geoFence : Circle? = null
+
+    init {
+        context = c
+    }
     // my cell displays data in one textview. need more if more data
     class ViewHolder(cell_view: LinearLayout) : RecyclerView.ViewHolder(cell_view)
 
@@ -115,7 +128,7 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         holder.itemView.trigger_name.text = item.name
         if(!item.armed)
         {
-            holder.itemView.chk_color.setCardBackgroundColor(Resources.getResource("pastel_red") as Int)
+            holder.itemView.chk_color.background.setTint(Color.rgb(120, 61, 58))
         }
 
         holder.itemView.title_view.setOnClickListener {
@@ -184,7 +197,14 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
                 when(item.type)
                 {
                     "h" -> {}
-                    "g" -> { } // TODO add mapfrag to map_frame ...
+                    "g" -> {
+                        if(mapFragment == null)
+                        {
+                            mapFragment = SupportMapFragment.newInstance()
+
+                        }
+
+                    } // TODO add mapfrag to map_frame ...
                 }
             }
             View.VISIBLE -> holder.itemView.sub_item.visibility = View.GONE
@@ -195,9 +215,10 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
     {
         when(item.armed)
         {
-            true -> holder.itemView.chk_color.setBackgroundColor(Color.rgb(47, 87, 47))
-            false -> holder.itemView.chk_color.setCardBackgroundColor(Color.rgb(100, 41, 38))
-        }
+            true -> holder.itemView.chk_color.background.setTint(Color.rgb(67 , 107, 67))
+            false -> holder.itemView.chk_color.background.setTint(Color.rgb(120, 61, 58))
+
+       }
     }
 
 

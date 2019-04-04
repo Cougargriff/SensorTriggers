@@ -10,9 +10,6 @@ import com.google.firebase.firestore.SetOptions
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewModel()
 {
@@ -27,6 +24,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             loadTriggers()
         }
     }
+
 
     private val DATE_FORMAT = "yyyy-MM-dd"
 
