@@ -121,6 +121,11 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                     }
                     HR_DATA.postValue(hr_map)
                 }
+
+                if(!it.result!!.exists())
+                {
+                    HR_DATA.value = HashMap()
+                }
             }
     }
 
@@ -139,7 +144,13 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                     val t = getTriggersFromSnap(data!!)
                     triggers.value = t
                 }
+
+                if(it.result!!.isEmpty)
+                {
+                    triggers.value = ArrayList()
+                }
             }
+
     }
 
     private fun getTriggersFromSnap(data : QuerySnapshot) : ArrayList<Trigger>

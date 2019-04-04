@@ -3,8 +3,11 @@ package com.senstrgrs.griffinjohnson.sensortriggers
 import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.ContextCompat.getColor
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -19,7 +22,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.trigger_cell.view.*
 import kotlinx.android.synthetic.main.trigger_view.*
 import android.support.v7.widget.SimpleItemAnimator
-
+import com.google.android.gms.common.api.ResolvingResultCallbacks
+import com.google.common.io.Resources
 
 
 class TriggerView : AppCompatActivity() {
@@ -77,9 +81,9 @@ class TriggerView : AppCompatActivity() {
     {
         setContentView(R.layout.trigger_view)
 
-        trigger_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
-        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        trigger_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.black))
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.black)
+        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.black)
 
         top_base.alpha = 0.5f
     }
@@ -111,7 +115,7 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
         holder.itemView.trigger_name.text = item.name
         if(!item.armed)
         {
-            holder.itemView.chk_color.alpha = 0.3f
+            holder.itemView.chk_color.setCardBackgroundColor(Resources.getResource("pastel_red") as Int)
         }
 
         holder.itemView.title_view.setOnClickListener {
@@ -191,8 +195,8 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>) : RecyclerView.Adapter<Re
     {
         when(item.armed)
         {
-            true -> holder.itemView.chk_color.alpha = 1f
-            false -> holder.itemView.chk_color.alpha = 0.3f
+            true -> holder.itemView.chk_color.setBackgroundColor(Color.rgb(47, 87, 47))
+            false -> holder.itemView.chk_color.setCardBackgroundColor(Color.rgb(100, 41, 38))
         }
     }
 

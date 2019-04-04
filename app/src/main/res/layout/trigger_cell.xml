@@ -28,7 +28,7 @@
             android:id="@+id/chk_color"
             android:layout_width="12dp"
             android:layout_height="match_parent"
-            app:cardBackgroundColor="@color/black"
+            app:cardBackgroundColor="@color/pastel_green"
             app:cardCornerRadius="0dp"
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="34dp">

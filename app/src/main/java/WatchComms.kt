@@ -180,14 +180,15 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
                 {
                 }
             })
+                .check()
     }
 
     fun styling()
     {
         setContentView(R.layout.activity_watch_comms)
-        comms_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.blueish))
-        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        comms_view.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.black))
+        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.black)
+        window.statusBarColor = ContextCompat.getColor(baseContext, R.color.black)
         chartView = findViewById(R.id.chartView)
         graphLoad.isIndeterminate = true
     }
@@ -457,6 +458,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback
                 }
                 ln.setSmooth(true)
                 ln.setThickness(4f)
+
+                ln.color = getColor(R.color.login_color)
 
                 chartView.addData(ln)
                 chartView.setClickablePointRadius(10f)

@@ -8,4 +8,8 @@
     <color name="black_overlay">#66000000</color>
 
     <color name="blueish">#4158D0</color>
+
+    <color name="pastel_green">#77DD77</color>
+    <color name="pastel_red">#ff6961</color>
+
 </resources>
