@@ -44,6 +44,7 @@ import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
@@ -274,7 +275,15 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
     fun getAppInstance() {
         // app is initialized in callback appListener()
-        connectiq.getApplicationInfo(getString(R.string.watch_appID), available, appListener())
+
+        try{
+            connectiq.getApplicationInfo(getString(R.string.watch_appID), available, appListener())
+
+        }
+        catch (e : Exception)
+        {
+            // TODO watch not rdy to connect.
+        }
     }
 
     fun checkDevices(): Boolean {

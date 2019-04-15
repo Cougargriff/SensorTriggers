@@ -164,10 +164,12 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
     private fun getTimestamp() : String
     {
-        return DateTimeFormatter
-            .ofPattern(DATE_FORMAT)
-            .withZone(ZoneOffset.UTC)
-            .format(Instant.now())
+//        return DateTimeFormatter
+//            .ofPattern(DATE_FORMAT)
+//            .withZone(ZoneOffset.UTC)
+//            .format(Instant.now())
+
+        return "2019-03-14"
     }
 
 }

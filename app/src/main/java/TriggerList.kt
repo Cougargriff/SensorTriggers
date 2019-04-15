@@ -194,6 +194,8 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
         {
             View.GONE -> {
                 holder.itemView.sub_item.visibility = View.VISIBLE
+            }
+            View.VISIBLE -> {
                 when(item.type)
                 {
                     "h" -> {}
@@ -206,8 +208,9 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
 
                     } // TODO add mapfrag to map_frame ...
                 }
+
+                holder.itemView.sub_item.visibility = View.GONE
             }
-            View.VISIBLE -> holder.itemView.sub_item.visibility = View.GONE
         }
     }
 
