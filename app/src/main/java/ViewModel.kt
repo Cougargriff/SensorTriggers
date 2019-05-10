@@ -4,42 +4,53 @@ import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
-import android.view.View
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
-import kotlinx.android.synthetic.main.activity_watch_comms.*
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewModel()
 {
-    private val HR_DATA : MutableLiveData<TreeMap<Int, Int>> by lazy {
-        MutableLiveData<TreeMap<Int, Int>>().also{
+    private val HR_DATA : MutableLiveData<HashMap<Int, Int>> by lazy {
+        MutableLiveData<HashMap<Int, Int>>().also{
             loadHR()
         }
     }
+
     private val triggers : MutableLiveData<ArrayList<Trigger>> by lazy {
         MutableLiveData<ArrayList<Trigger>>().also {
             loadTriggers()
         }
     }
 
+    private val location_history : MutableLiveData<ArrayList<LocationStamp>> by lazy {
+        MutableLiveData<ArrayList<LocationStamp>>().also {
+            loadLocationStamps()
+        }
+    }
+
+
+
+    private val DATE_FORMAT = "yyyy-MM-dd"
+
     fun getTriggers() : LiveData<ArrayList<Trigger>>
     {
         return triggers
     }
 
-    fun getHRData() : LiveData<TreeMap<Int, Int>>
+    fun getHRData() : LiveData<HashMap<Int, Int>>
     {
         return HR_DATA
     }
+
+    fun getLocationHistory() : LiveData<ArrayList<LocationStamp>>
+    {
+        return location_history
+    }
+
 
     fun syncHR(cb : () -> Unit)
     {
@@ -65,28 +76,47 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
     fun syncTriggers()
     {
-        for(t in triggers.value!!)
+        if(triggers.value != null)
         {
-            var toStore = mutableMapOf<String, Any>()
-            toStore.put("threshold", t.hr_val)
-            userRef.collection("triggers").document(t.name)
-                    .set(toStore, SetOptions.merge())
+            for(t in triggers.value!!)
+            {
+                userRef.collection("triggers").document(t.name)
+                        .set(t.toAnyMap(), SetOptions.merge())
+            }
         }
         loadTriggers()
+
     }
 
     fun addTrigger(trig : Trigger)
     {
         var new = triggers.value
-        new!!.add(trig)
+        if(new == null)
+        {
+            new = ArrayList<Trigger>().apply {
+                add(trig)
+            }
+        }
+        else
+        {
+            new!!.add(trig)
+        }
         triggers.postValue(new)
     }
 
     fun addNewHR(hash : HashMap<Int, Int>)
     {
         var new = HR_DATA.value
-        new!!.putAll(hash)
-        HR_DATA.postValue(new)
+        if(new != null)
+        {
+            new!!.putAll(hash)
+            HR_DATA.postValue(new)
+        }
+        else
+        {
+            HR_DATA.value = hash
+        }
+
     }
 
     fun loadHR()
@@ -96,16 +126,87 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 if(it.isSuccessful && it.result!!.exists())
                 {
                     var db_hash = it.result!!.data as HashMap<String, Int>
-                    var hr_map = TreeMap<Int, Int>()
+                    var hr_map = HashMap<Int, Int>()
                     for(key in db_hash.keys)
                     {
                         hr_map.put(key.toInt(), db_hash.get(key)!!)
                     }
                     HR_DATA.postValue(hr_map)
                 }
+
+                if(!it.result!!.exists())
+                {
+                    HR_DATA.value = HashMap()
+                }
             }
     }
 
+    fun loadLocationStamps()
+    {
+        userRef.collection("location_history").document(getTimestamp())
+                .collection("locations").orderBy("time", Query.Direction.ASCENDING)
+                .get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful && !it.result!!.isEmpty)
+                    {
+                        var data = it.result
+                        val loc_hist = getLocationsFromSnap(data!!)
+                        location_history.value = loc_hist
+                    }
+
+                    if(it.result!!.isEmpty)
+                    {
+                        location_history.value = ArrayList()
+                    }
+                }
+    }
+
+    private fun getLocationsFromSnap(data : QuerySnapshot) : ArrayList<LocationStamp>
+    {
+        var hist = ArrayList<LocationStamp>()
+
+        for(loc in data.documents)
+        {
+            hist.add(LocationStamp.fromSnap(loc))
+        }
+        return hist
+    }
+
+    fun syncLocationStamps()
+    {
+        if(location_history.value != null)
+        {
+            for(l in location_history.value!!)
+            {
+                userRef.collection("location_history").document(getTimestamp())
+                        .collection("locations").document(l.epoch.toString())
+                        .set(l.toAnyMap(), SetOptions.merge()).addOnCompleteListener {
+                            Log.i("loc stamp sync", it.toString())
+                        }
+            }
+        }
+    }
+
+    fun addLocationStamp(stamp : LocationStamp)
+    {
+        var new = location_history.value
+        if(new == null)
+        {
+            new = ArrayList<LocationStamp>().apply {
+                add(stamp)
+            }
+        }
+        else
+        {
+            new!!.add(stamp)
+        }
+        location_history.postValue(new)
+    }
+
+    fun setTriggers(t : ArrayList<Trigger>)
+    {
+        triggers.value = t
+    }
 
     fun loadTriggers()
     {
@@ -114,9 +215,16 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 if(it.isSuccessful && !it.result!!.isEmpty)
                 {
                     var data = it.result
-                    triggers.postValue(getTriggersFromSnap(data!!)!!)
+                    val t = getTriggersFromSnap(data!!)
+                    triggers.value = t
+                }
+
+                if(it.result!!.isEmpty)
+                {
+                    triggers.value = ArrayList()
                 }
             }
+
     }
 
     private fun getTriggersFromSnap(data : QuerySnapshot) : ArrayList<Trigger>
@@ -125,8 +233,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
         for(tSnap in data.documents)
         {
-            val thresh = tSnap.get("threshold") // todo new way to get properties. what if have >10? batch get properties regardless of name?
-            list.add(Trigger(tSnap.id, (thresh as Long).toInt()))
+            list.add(Trigger.fromSnap(tSnap))
         }
         return list
     }
@@ -134,9 +241,10 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
     private fun getTimestamp() : String
     {
         return DateTimeFormatter
-            .ofPattern("yyyy-MM-dd")
+            .ofPattern(DATE_FORMAT)
             .withZone(ZoneOffset.UTC)
             .format(Instant.now())
+
     }
 
 }

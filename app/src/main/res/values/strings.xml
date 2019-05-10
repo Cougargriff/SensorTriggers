@@ -11,11 +11,19 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="api_key">AIzaSyDRhGjSt269Q4-TUiFpftcSxxmWsF0BNWk</string>
+    <string name="dark_key">26d6787aa2975027ec1b77a15a2a9f1e</string>
+
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
 
     <string name="title_activity_login_full">LoginFull</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="watch_appID">a3421fee-d289-106a-538c-b9547ab12095</string>
+    <string name="trigger_name">Trigger Name</string>
+    <string name="heart_rate">Heart Rate :</string>
+    <string name="options">Options</string>
+    <string name="weather">Weather</string>
+    <string name="location">Location</string>
+    <string name="hr_context">HR Context</string>
 </resources>

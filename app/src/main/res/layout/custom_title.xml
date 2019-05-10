@@ -9,8 +9,8 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/login_color"
-        app:cardCornerRadius="15dp"
+        android:backgroundTint="@color/dk_gray"
+        app:cardCornerRadius="0dp"
         app:cardPreventCornerOverlap="true">
 
         <android.support.constraint.ConstraintLayout
@@ -25,9 +25,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="98dp"
                 android:layout_marginBottom="8dp"
-                android:text="Create a Trigger"
+                android:text="Create Trigger"
                 android:textAlignment="center"
-                android:textColor="@color/blueish"
+                android:textColor="@color/white"
                 android:textSize="30sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

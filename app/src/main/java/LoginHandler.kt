@@ -20,7 +20,7 @@ class LoginHandler(lPacket : LoginActivity.User, context: Context, progress : Pr
     {
         val intent = Intent(context, WatchComms::class.java)
 
-        pBar.visibility = View.INVISIBLE // TODO leave here?
+        pBar.visibility = View.INVISIBLE
         ContextCompat.startActivity(context, intent, null)
     }
 

@@ -26,9 +26,6 @@ class LoginActivity : AppCompatActivity()
         styling()
         initialize()
         setButtonListeners()
-
-
-
     }
 
     fun setButtonListeners()
@@ -119,14 +116,14 @@ class LoginActivity : AppCompatActivity()
     {
         setContentView(R.layout.login_full)
 
-        window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
-        window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
+        //window.navigationBarColor = ContextCompat.getColor(baseContext, R.color.blueish)
+        //window.navigationBarDividerColor = ContextCompat.getColor(baseContext, R.color.login_color)
         window.statusBarColor = Color.parseColor("#4158D0")
 
         RevelyGradient
             .linear()
-            .angle(45f)
-            .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#C850C0"), Color.parseColor("#FFCC80")))
+            .angle(90f)
+            .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#000000")))
             .onBackgroundOf(view)
 
         val valueanimator = ValueAnimator.ofFloat(0f, 1f)
