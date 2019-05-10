@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.util.Log
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
 import java.time.Instant
@@ -143,7 +144,8 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
     fun loadLocationStamps()
     {
         userRef.collection("location_history").document(getTimestamp())
-                .collection("locations").get()
+                .collection("locations").orderBy("time", Query.Direction.ASCENDING)
+                .get()
                 .addOnCompleteListener {
                     if(it.isSuccessful && !it.result!!.isEmpty)
                     {

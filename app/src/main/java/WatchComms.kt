@@ -7,6 +7,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.content.*
 
 import android.content.res.Resources
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -27,6 +28,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.PolylineOptions
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -104,6 +106,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                                         this, R.raw.map_style))
 
                         // todo add poly lines here
+
+
 
                         if (!success) {
                         }
@@ -234,6 +238,17 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         vm.getLocationHistory().observe(this, android.arch.lifecycle.Observer {
             vm.syncLocationStamps()
+
+            var poly_op = PolylineOptions()
+                    .clickable(false)
+                    .color(Color.BLUE)
+
+            for(loc in vm.getLocationHistory().value!!)
+            {
+                poly_op.add(LatLng(loc.lat, loc.long))
+            }
+
+            map.addPolyline(poly_op)
         })
 
         // TODO observe location updates in firestore

@@ -25,8 +25,8 @@ class LocationTrackService : Service()
     private var mLocationManager: LocationManager? = null
     private val notificationManager: NotificationManager? = null
 
-    private val LOCATION_INTERVAL = 500
-    private val LOCATION_DISTANCE = 10f
+    private val LOCATION_INTERVAL = 5000
+    private val MIN_LOCATION_DISTANCE = 10f
 
 
 
@@ -110,7 +110,7 @@ class LocationTrackService : Service()
 
         try
         {
-            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), LOCATION_DISTANCE, mLocationListener)
+            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), MIN_LOCATION_DISTANCE, mLocationListener)
 
         }
         catch (ex: java.lang.SecurityException)
