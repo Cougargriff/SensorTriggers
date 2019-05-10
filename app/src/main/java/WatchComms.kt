@@ -4,9 +4,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.arch.lifecycle.ViewModelProviders
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
 
 import android.content.res.Resources
 import android.support.v7.app.AppCompatActivity
@@ -14,7 +12,6 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.util.Log
 
-import android.content.ServiceConnection
 import android.os.IBinder
 import android.view.View
 import android.widget.*
@@ -62,6 +59,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var darkSky: DarkSky
     private var gpsService: LocationTrackService? = null
 
+    private lateinit var locationBroadcastReceiver: BroadcastReceiver
+
     private val LOCATION_PERMS = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
 
@@ -73,6 +72,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     var mAuth = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
     var perm_granted = false
+
+    private var isTracking = false
 
 
     @SuppressLint("MissingPermission")
@@ -102,6 +103,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                                 MapStyleOptions.loadRawResourceStyle(
                                         this, R.raw.map_style))
 
+                        // todo add poly lines here
+
                         if (!success) {
                         }
                     } catch (e: Resources.NotFoundException) {
@@ -126,9 +129,11 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         uiUpdaters()
         setButtonListeners()
+
     }
 
-    fun startBackgroundService() {
+    fun startBackgroundService()
+    {
         val intent = Intent(this.application, LocationTrackService::class.java)
         this.application.startService(intent)
         this.application.bindService(intent, serviceConnection(), Context.BIND_AUTO_CREATE)
@@ -139,6 +144,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             if (name!!.className.endsWith("LocationTrackService")) {
                 gpsService = (service as LocationTrackService.LocationServiceBinder).getService()
                 track_btn.visibility = View.VISIBLE
+
             }
         }
 
@@ -148,6 +154,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                 track_btn.visibility = View.GONE
             }
         }
+
     }
 
 
@@ -186,6 +193,29 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         //fusedLocation.requestLocationUpdates(LocationRequest(), object : LocationCallback)
 
+        locationBroadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?)
+            {
+                val lat = intent!!.extras["lat"] as Double
+                val long = intent!!.extras["long"] as Double
+                val epoch = intent!!.extras["epoch_stamp"] as Long
+
+                val curr_location_stamp = LocationStamp(epoch, lat, long)
+
+                vm.addLocationStamp(curr_location_stamp)
+
+                // todo send the location update to firestore
+
+
+
+                curr_lat.text = lat.toString()
+                curr_long.text = long.toString()
+            }
+        }
+        registerReceiver(locationBroadcastReceiver, IntentFilter("location_update"))
+
+
+
         (supportFragmentManager.findFragmentById(R.id.mMap) as SupportMapFragment).getMapAsync(this)
 
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
@@ -204,6 +234,12 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             // update ui on triggers change
             vm.syncTriggers()
         })
+
+        vm.getLocationHistory().observe(this, android.arch.lifecycle.Observer {
+            vm.syncLocationStamps()
+        })
+
+        // TODO observe location updates in firestore
 
 
     }
@@ -247,14 +283,17 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         }
 
 
-        var isTracking = false
+
         track_btn.setOnClickListener {
             when (isTracking) {
                 true -> {
                     gpsService!!.stopTracking()
+                    track_btn.background = resources.getDrawable(R.drawable.roundshapebtn)
                 }
                 false -> {
-                    gpsService!!.startTracking()
+                    gpsService!!.startTracking(this)
+
+                    track_btn.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.black))
                 }
             }
             isTracking = !isTracking
@@ -357,6 +396,13 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         mAuth.signOut()
         super.onBackPressed()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

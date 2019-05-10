@@ -25,6 +25,13 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
         }
     }
 
+    private val location_history : MutableLiveData<ArrayList<LocationStamp>> by lazy {
+        MutableLiveData<ArrayList<LocationStamp>>().also {
+            loadLocationStamps()
+        }
+    }
+
+
 
     private val DATE_FORMAT = "yyyy-MM-dd"
 
@@ -37,6 +44,12 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
     {
         return HR_DATA
     }
+
+    fun getLocationHistory() : LiveData<ArrayList<LocationStamp>>
+    {
+        return location_history
+    }
+
 
     fun syncHR(cb : () -> Unit)
     {
@@ -127,6 +140,67 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
             }
     }
 
+    fun loadLocationStamps()
+    {
+        userRef.collection("location_history").document(getTimestamp())
+                .collection("locations").get()
+                .addOnCompleteListener {
+                    if(it.isSuccessful && !it.result!!.isEmpty)
+                    {
+                        var data = it.result
+                        val loc_hist = getLocationsFromSnap(data!!)
+                        location_history.value = loc_hist
+                    }
+
+                    if(it.result!!.isEmpty)
+                    {
+                        location_history.value = ArrayList()
+                    }
+                }
+    }
+
+    private fun getLocationsFromSnap(data : QuerySnapshot) : ArrayList<LocationStamp>
+    {
+        var hist = ArrayList<LocationStamp>()
+
+        for(loc in data.documents)
+        {
+            hist.add(LocationStamp.fromSnap(loc))
+        }
+        return hist
+    }
+
+    fun syncLocationStamps()
+    {
+        if(location_history.value != null)
+        {
+            for(l in location_history.value!!)
+            {
+                userRef.collection("location_history").document(getTimestamp())
+                        .collection("locations").document(l.epoch.toString())
+                        .set(l.toAnyMap(), SetOptions.merge()).addOnCompleteListener {
+                            Log.i("", it.toString())
+                        }
+            }
+        }
+    }
+
+    fun addLocationStamp(stamp : LocationStamp)
+    {
+        var new = location_history.value
+        if(new == null)
+        {
+            new = ArrayList<LocationStamp>().apply {
+                add(stamp)
+            }
+        }
+        else
+        {
+            new!!.add(stamp)
+        }
+        location_history.postValue(new)
+    }
+
     fun setTriggers(t : ArrayList<Trigger>)
     {
         triggers.value = t
@@ -164,12 +238,11 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
     private fun getTimestamp() : String
     {
-//        return DateTimeFormatter
-//            .ofPattern(DATE_FORMAT)
-//            .withZone(ZoneOffset.UTC)
-//            .format(Instant.now())
+        return DateTimeFormatter
+            .ofPattern(DATE_FORMAT)
+            .withZone(ZoneOffset.UTC)
+            .format(Instant.now())
 
-        return "2019-03-14"
     }
 
 }

@@ -10,6 +10,16 @@
     android:visibility="visible"
     tools:context=".WatchComms">
 
+    <TextView
+        android:id="@+id/curr_long"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="121dp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@+id/track_btn"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/track_btn"
         style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -24,8 +34,8 @@
         android:elevation="13dp"
         android:text="Track Me"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Button"
-        android:textColor="@color/black"
-        android:visibility="gone"
+        android:textColor="@color/white"
+        android:visibility="visible"
         app:layout_constraintStart_toEndOf="@+id/addTrigger"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
@@ -200,4 +210,14 @@
 
         </android.support.constraint.ConstraintLayout>
     </android.support.v7.widget.CardView>
+
+    <TextView
+        android:id="@+id/curr_lat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="92dp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@+id/track_btn"
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

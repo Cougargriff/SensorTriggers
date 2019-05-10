@@ -4,15 +4,18 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import java.lang.Exception
+import kotlin.contracts.contract
 
 class LocationTrackService : Service()
 {
@@ -22,8 +25,10 @@ class LocationTrackService : Service()
     private var mLocationManager: LocationManager? = null
     private val notificationManager: NotificationManager? = null
 
-    private val LOCATION_INTERVAL = 500
-    private val LOCATION_DISTANCE = 10
+    private val LOCATION_INTERVAL = 1000
+    private val LOCATION_DISTANCE = 0
+
+
 
     override fun onBind(intent: Intent?): IBinder?
     {
@@ -33,6 +38,7 @@ class LocationTrackService : Service()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
         super.onStartCommand(intent, flags, startId)
+
         return START_NOT_STICKY
     }
 
@@ -40,6 +46,7 @@ class LocationTrackService : Service()
     {
         Log.i(TAG, "onCreate")
         startForeground(12345678, getNotification())
+
     }
 
     override fun onDestroy()
@@ -59,22 +66,54 @@ class LocationTrackService : Service()
         }
     }
 
-    private fun initializeLocationManager()
+    private fun initializeLocationManager(context: Context)
     {
         if (mLocationManager == null)
         {
-            mLocationManager = applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            mLocationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         }
     }
 
-    fun startTracking()
+    fun startTracking(context: Context)
     {
-        initializeLocationManager()
-        mLocationListener = LocationListener(LocationManager.GPS_PROVIDER)
+        initializeLocationManager(context!!)
+        mLocationListener =  object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+
+                Log.i(TAG, "LocationChanged: $location")
+
+
+                val location_upate = Intent("location_update")
+
+                location_upate.putExtra("lat", location.latitude)
+                location_upate.putExtra("long", location.longitude)
+                location_upate.putExtra("epoch_stamp", System.currentTimeMillis() / 1000)
+
+
+                context.sendBroadcast(location_upate)
+            }
+
+            override fun onProviderDisabled(provider: String?) {
+                Log.i("loc tracking", "lost provider")
+
+            }
+
+            override fun onProviderEnabled(provider: String?) {
+
+
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+
+
+            }
+
+
+        }
 
         try
         {
-            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), LOCATION_DISTANCE.toFloat(), mLocationListener)
+            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), 10f, mLocationListener)
 
         }
         catch (ex: java.lang.SecurityException)
@@ -93,49 +132,19 @@ class LocationTrackService : Service()
         this.onDestroy()
     }
 
-    private class LocationListener(provider: String) : android.location.LocationListener
-    {
-        private val lastLocation: Location? = null
-        private val TAG = "LocationListener"
-        private var mLastLocation: Location? = null
-
-        init
-        {
-            mLastLocation = Location(provider)
-        }
-
-        override fun onLocationChanged(location: Location)
-        {
-            mLastLocation = location
-            Log.i(TAG, "LocationChanged: $location")
-        }
-
-        override fun onProviderDisabled(provider: String)
-        {
-            Log.e(TAG, "onProviderDisabled: $provider")
-        }
-
-        override fun onProviderEnabled(provider: String)
-        {
-            Log.e(TAG, "onProviderEnabled: $provider")
-        }
-
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle)
-        {
-            Log.e(TAG, "onStatusChanged: $status")
-        }
-
-    }
 
     private fun getNotification(): Notification
     {
 
-        val channel = NotificationChannel("channel_01", "My Channel", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel("channel_01", "Location Track (for poly  lines)", NotificationManager.IMPORTANCE_DEFAULT)
 
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager!!.createNotificationChannel(channel)
 
         val builder = Notification.Builder(applicationContext, "channel_01").setAutoCancel(true)
+
+        //TODO custom notification view
+
         return builder.build()
     }
 
