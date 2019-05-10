@@ -124,9 +124,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         styling()
         initialize()
-
         startBackgroundService()
-
         uiUpdaters()
         setButtonListeners()
 
@@ -189,7 +187,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         userRef = db.collection("users").document(mAuth.uid.toString())
         vm = ViewModelProviders.of(this, ViewModelFactory(userRef)).get(ViewModel(userRef)::class.java)
 
-        loadingTimeout(5000)
 
         //fusedLocation.requestLocationUpdates(LocationRequest(), object : LocationCallback)
 

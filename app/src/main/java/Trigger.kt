@@ -7,6 +7,7 @@ import com.google.type.LatLng
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import kotlinx.android.synthetic.main.triggerdialog.*
+import java.lang.Exception
 import java.util.*
 
 
@@ -43,8 +44,10 @@ class Trigger(var name : String, var hr_val : Int, var armed : Boolean, var type
             val type = tSnap.get("type") as String
             val weather = tSnap.get("weather") as Boolean
             val location = tSnap.get("location") as Boolean
-            val lat = tSnap.get("latitude") as Double
-            val long = tSnap.get("longitude") as Double
+
+            val  lat = tSnap.get("latitude") as Double
+            val  long = tSnap.get("longitude") as Double
+
             val hr_context = tSnap.get("hr_context") as Boolean
             val time = (tSnap.get("time_triggered") as Long).toInt()
 

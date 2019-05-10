@@ -179,7 +179,7 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
                 userRef.collection("location_history").document(getTimestamp())
                         .collection("locations").document(l.epoch.toString())
                         .set(l.toAnyMap(), SetOptions.merge()).addOnCompleteListener {
-                            Log.i("", it.toString())
+                            Log.i("loc stamp sync", it.toString())
                         }
             }
         }

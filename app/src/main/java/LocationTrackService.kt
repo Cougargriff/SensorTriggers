@@ -25,8 +25,8 @@ class LocationTrackService : Service()
     private var mLocationManager: LocationManager? = null
     private val notificationManager: NotificationManager? = null
 
-    private val LOCATION_INTERVAL = 1000
-    private val LOCATION_DISTANCE = 0
+    private val LOCATION_INTERVAL = 500
+    private val LOCATION_DISTANCE = 10f
 
 
 
@@ -44,9 +44,8 @@ class LocationTrackService : Service()
 
     override fun onCreate()
     {
-        Log.i(TAG, "onCreate")
         startForeground(12345678, getNotification())
-
+        Log.i(TAG, "Tracking Service Created")
     }
 
     override fun onDestroy()
@@ -60,9 +59,8 @@ class LocationTrackService : Service()
             }
             catch(e : Exception)
             {
-                Log.i(TAG, "fail to remove location listners, ignore", e)
+                Log.i(TAG, "fail to remove location listeners, ignore", e)
             }
-
         }
     }
 
@@ -77,11 +75,12 @@ class LocationTrackService : Service()
     fun startTracking(context: Context)
     {
         initializeLocationManager(context!!)
+        Log.i(TAG, "start Tracking")
+
         mLocationListener =  object : LocationListener {
             override fun onLocationChanged(location: Location) {
 
                 Log.i(TAG, "LocationChanged: $location")
-
 
                 val location_upate = Intent("location_update")
 
@@ -104,25 +103,23 @@ class LocationTrackService : Service()
             }
 
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-
+                Log.i("Location Tracking", status.toString())
 
             }
-
-
         }
 
         try
         {
-            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), 10f, mLocationListener)
+            mLocationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL.toLong(), LOCATION_DISTANCE, mLocationListener)
 
         }
         catch (ex: java.lang.SecurityException)
         {
-            // Log.i(TAG, "fail to request location update, ignore", ex);
+             Log.i(TAG, "fail to request location update, ignore", ex)
         }
         catch (ex: IllegalArgumentException)
         {
-            // Log.d(TAG, "gps provider does not exist " + ex.getMessage());
+             Log.i(TAG, "gps provider does not exist " + ex.message)
         }
 
     }
@@ -136,7 +133,7 @@ class LocationTrackService : Service()
     private fun getNotification(): Notification
     {
 
-        val channel = NotificationChannel("channel_01", "Location Track (for poly  lines)", NotificationManager.IMPORTANCE_DEFAULT)
+        val channel = NotificationChannel("channel_01", "My Channel", NotificationManager.IMPORTANCE_DEFAULT)
 
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager!!.createNotificationChannel(channel)
