@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat
 import android.util.Log
 
 import android.os.IBinder
+import android.provider.Settings
 import android.view.View
 import android.widget.*
 import com.db.chart.animation.Animation
@@ -26,9 +27,7 @@ import com.garmin.android.connectiq.IQDevice
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -41,13 +40,17 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
+import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
+import org.jetbrains.anko.withAlpha
 import java.lang.ClassCastException
 import java.lang.Exception
 import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
+import kotlin.coroutines.CoroutineContext
 
 
 class WatchComms : AppCompatActivity(), OnMapReadyCallback {
@@ -79,6 +82,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             .clickable(false)
             .color(Color.BLUE)
 
+    var circle_ops = ArrayList<CircleOptions>()
+
     private var isTracking = false
 
 
@@ -109,7 +114,13 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                     }
 
                     map.addPolyline(poly_op)
+
+                    for(c in circle_ops)
+                    {
+                        map.addCircle(c)
+                    }
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
+
 
                 }
             }
@@ -118,7 +129,10 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
 
         styling()
@@ -126,6 +140,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         startBackgroundService()
         uiUpdaters()
         setButtonListeners()
+
 
     }
 
@@ -180,6 +195,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         window.statusBarColor = ContextCompat.getColor(baseContext, R.color.black)
         chartView = findViewById(R.id.chartView)
         graphLoad.isIndeterminate = true
+
+
     }
 
     fun initialize() {
@@ -200,10 +217,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
                 vm.addLocationStamp(curr_location_stamp)
 
-                // todo send the location update to firestore
-
-
-
                 curr_lat.text = lat.toString()
                 curr_long.text = long.toString()
             }
@@ -216,14 +229,63 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
         connectiq.initialize(this, true, connectListener())
+
+
+
     }
+
+    // TODO should migrate map overlay stuff to view model
 
     private fun updatePolyLines()
     {
-        for(loc in vm.getLocationHistory().value!!)
+
+
+        try
         {
-            poly_op.add(LatLng(loc.lat, loc.long))
+            for(loc in vm.getLocationHistory().value!!)
+            {
+                poly_op.add(LatLng(loc.lat, loc.long))
+            }
+
+
+            doAsync {
+                uiThread {
+                    map.addPolyline(poly_op).jointType = JointType.ROUND
+                }
+
+            }
+            
         }
+        catch(e : Exception)
+        {
+
+        }
+    }
+
+    private fun updateGeoFenceViews()
+    {
+        try
+        {
+            for(t in vm.getTriggers().value!!)
+            {
+                if(t.type.compareTo("g") == 0)
+                {
+                    circle_ops.add(CircleOptions()
+                            .center(LatLng(t.lat, t.long))
+                            .clickable(true)
+                            .radius(100.0)
+                            .strokeColor(Color.BLUE)
+                            .strokeWidth(3f)
+                            .fillColor(ContextCompat.getColor(this, R.color.blueish).withAlpha(50)))
+                }
+            }
+
+        }
+        catch(e : Exception)
+        {
+
+        }
+
     }
 
     fun uiUpdaters() {
@@ -237,6 +299,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
             // update ui on triggers change
             vm.syncTriggers()
+            updateGeoFenceViews()
+
         })
 
         vm.getLocationHistory().observe(this, android.arch.lifecycle.Observer {
