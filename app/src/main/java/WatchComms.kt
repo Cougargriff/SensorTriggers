@@ -75,25 +75,22 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     var mAuth = FirebaseAuth.getInstance()
     var db = FirebaseFirestore.getInstance()
     var perm_granted = false
+    var poly_op = PolylineOptions()
+            .clickable(false)
+            .color(Color.BLUE)
 
     private var isTracking = false
 
 
     @SuppressLint("MissingPermission")
     override fun onMapReady(p0: GoogleMap?) {
-
-        val BOSTON = com.google.android.gms.maps.model.LatLng(42.360081, -71.058884)
-
         var myLocation: LatLng
-
-        map = p0!!
-
         checkPermissions {
             perm_granted = it!!
 
-            map.isMyLocationEnabled = perm_granted
-
             if (perm_granted) {
+                map = p0!!
+                map.isMyLocationEnabled = perm_granted
                 fusedLocation.lastLocation.addOnSuccessListener {
                     val l = LatLng(it!!.latitude, it!!.longitude)
                     myLocation = l
@@ -106,15 +103,12 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                                 MapStyleOptions.loadRawResourceStyle(
                                         this, R.raw.map_style))
 
-                        // todo add poly lines here
-
-
-
                         if (!success) {
                         }
                     } catch (e: Resources.NotFoundException) {
                     }
 
+                    map.addPolyline(poly_op)
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
 
                 }
@@ -224,6 +218,14 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         connectiq.initialize(this, true, connectListener())
     }
 
+    private fun updatePolyLines()
+    {
+        for(loc in vm.getLocationHistory().value!!)
+        {
+            poly_op.add(LatLng(loc.lat, loc.long))
+        }
+    }
+
     fun uiUpdaters() {
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {
@@ -239,17 +241,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         vm.getLocationHistory().observe(this, android.arch.lifecycle.Observer {
             vm.syncLocationStamps()
-
-            var poly_op = PolylineOptions()
-                    .clickable(false)
-                    .color(Color.BLUE)
-
-            for(loc in vm.getLocationHistory().value!!)
-            {
-                poly_op.add(LatLng(loc.lat, loc.long))
-            }
-
-            map.addPolyline(poly_op)
+            updatePolyLines()
         })
 
         // TODO observe location updates in firestore
@@ -270,12 +262,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun setButtonListeners() {
-        transmit_button.setOnClickListener {
-            when (status) {
-                "OFF" -> transmit_temporal("ON")
-                "ON" -> transmit_temporal("OFF")
-            }
-        }
+
 
         sync_button.setOnClickListener {
             graphLoad.visibility = View.VISIBLE
@@ -301,12 +288,20 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             when (isTracking) {
                 true -> {
                     gpsService!!.stopTracking()
-                    track_btn.background = resources.getDrawable(R.drawable.roundshapebtn)
+                    track_btn.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.black))
+
+                    curr_lat.visibility = View.GONE
+                    curr_long.visibility = View.GONE
                 }
                 false -> {
                     gpsService!!.startTracking(this)
 
-                    track_btn.setBackgroundColor(ContextCompat.getColor(baseContext, R.color.black))
+                    track_btn.setBackgroundResource(R.drawable.roundshapebtn)
+
+
+
+                    curr_lat.visibility = View.VISIBLE
+                    curr_long.visibility = View.VISIBLE
                 }
             }
             isTracking = !isTracking
@@ -370,10 +365,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     fun triggerFilter(sample: HashMap<Int, Int>) {}
 
     fun makeComponentsVisible() {
-        transmit_button.alpha = 0f
         sync_button.alpha = 0f
 
-        transmit_button.visibility = View.VISIBLE
         sync_button.visibility = View.VISIBLE
 
 
@@ -381,7 +374,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         valueanimator.addUpdateListener {
             val value = it.animatedValue as Float
 
-            transmit_button.alpha = value
             sync_button.alpha = value
         }
         valueanimator.duration = 1400L
@@ -465,22 +457,60 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             chartView.reset()
             var ln = LineSet()
             var keys = sample.keys.sorted()
+            var minV  = 1000f
+            var maxV = 0f
 
-            if (!keys.isEmpty()) {
-                for (key in keys) {
+            var points = ArrayList<Float>()
+            if (!keys.isEmpty())
+            {
+                for (key in keys)
+                {
 
-                    try {
-                        val value = sample.get(key)!!.toFloat()
-                        var pnt = Point("", value)
 
-                        ln.addPoint(pnt)
-                    }
-                    catch(e : NullPointerException)
+                    val value = sample.get(key)!!.toFloat()
+
+
+                    if(value > maxV)
                     {
-                        Log.i("CHART UPDATER PREP VALUES", "unwrap of null")
+                        maxV = value
+
+                    }
+                    if(value < minV)
+                    {
+                        minV = value
+
                     }
 
 
+                    points.add(value)
+
+
+
+                }
+
+
+                for(v in points)
+                {
+                    if(v == maxV)
+                    {
+                        ln.addPoint(Point(v.toString(), v).apply {
+                            this.strokeColor = Color.RED
+                            this.strokeThickness = 8f
+                            this.radius = 10f
+                        })
+                    }
+                    else if(v == minV)
+                    {
+                        ln.addPoint(Point(v.toString(), v).apply {
+                            this.strokeColor = Color.BLUE
+                            this.strokeThickness = 8f
+                            this.radius = 8f
+                        })
+                    }
+                    else
+                    {
+                        ln.addPoint(Point("", v))
+                    }
                 }
                 ln.setSmooth(true)
                 ln.setThickness(4f)
