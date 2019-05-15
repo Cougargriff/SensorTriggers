@@ -44,6 +44,7 @@ import kotlinx.android.synthetic.main.activity_watch_comms.*
 import org.jetbrains.anko.toast
 import java.lang.ClassCastException
 import java.lang.Exception
+import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
@@ -467,10 +468,18 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
             if (!keys.isEmpty()) {
                 for (key in keys) {
-                    val value = sample.get(key)!!.toFloat()
-                    var pnt = Point("", value)
 
-                    ln.addPoint(pnt)
+                    try {
+                        val value = sample.get(key)!!.toFloat()
+                        var pnt = Point("", value)
+
+                        ln.addPoint(pnt)
+                    }
+                    catch(e : NullPointerException)
+                    {
+                        Log.i("CHART UPDATER PREP VALUES", "unwrap of null")
+                    }
+
 
                 }
                 ln.setSmooth(true)
@@ -503,13 +512,31 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                     if (p3 == ConnectIQ.IQMessageStatus.SUCCESS) {
                         try {
                             val hash = p2!![0] as HashMap<Int, Int>
-                            vm.addNewHR(hash)
+                            vm.addNewHR(validateHash(hash))
                         } catch (e: ClassCastException) {
                             Log.i("from phone", "tether request from watch")
                         }
                     }
                 }
             }
+
+    private fun validateHash(hash : HashMap<Int, Int>) : HashMap<Int, Int>
+    {
+        var toReturn = HashMap<Int, Int>()
+
+        for(k  in hash.keys)
+        {
+            try {
+                toReturn.put(k, hash.get(k)!!)
+            }
+            catch (e : NullPointerException)
+            {
+                Log.i("validating hash", "caught bad value")
+            }
+        }
+
+        return toReturn
+    }
 
     fun sendMessageCallback(): ConnectIQ.IQSendMessageListener =
             object : ConnectIQ.IQSendMessageListener {
