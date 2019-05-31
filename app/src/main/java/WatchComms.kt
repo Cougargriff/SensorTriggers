@@ -40,6 +40,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 
 import kotlinx.android.synthetic.main.activity_watch_comms.*
+import kotlinx.android.synthetic.main.trigger_cell.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
@@ -53,16 +54,16 @@ import kotlin.concurrent.timerTask
 import kotlin.coroutines.CoroutineContext
 
 
-class WatchComms : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var connectiq: ConnectIQ
-    private lateinit var available: IQDevice
-    private lateinit var paired: List<IQDevice>
+class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
+
+
     private lateinit var chartView: LineChartView
-    private lateinit var app: IQApp
     private lateinit var userRef: DocumentReference
     private lateinit var vm: ViewModel
     private lateinit var map: GoogleMap
     private lateinit var darkSky: DarkSky
+    private lateinit var CIQ : CIQ
+
     private var gpsService: LocationTrackService? = null
 
     private lateinit var locationBroadcastReceiver: BroadcastReceiver
@@ -85,7 +86,12 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     var circle_ops = ArrayList<CircleOptions>()
 
     private var isTracking = false
+    var mapLoaded = false
+    var loadedTriggers = false
 
+
+    override fun onMapLoaded() {
+    }
 
     @SuppressLint("MissingPermission")
     override fun onMapReady(p0: GoogleMap?) {
@@ -95,6 +101,9 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
             if (perm_granted) {
                 map = p0!!
+
+                mapLoaded = true
+
                 map.isMyLocationEnabled = perm_granted
                 fusedLocation.lastLocation.addOnSuccessListener {
                     val l = LatLng(it!!.latitude, it!!.longitude)
@@ -113,12 +122,11 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                     } catch (e: Resources.NotFoundException) {
                     }
 
-                    map.addPolyline(poly_op)
+                    updateGeoFenceViews()
+                    updatePolyLines()
 
-                    for(c in circle_ops)
-                    {
-                        map.addCircle(c)
-                    }
+
+
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
 
 
@@ -223,12 +231,14 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         }
         registerReceiver(locationBroadcastReceiver, IntentFilter("location_update"))
 
-
-
         (supportFragmentManager.findFragmentById(R.id.mMap) as SupportMapFragment).getMapAsync(this)
 
-        connectiq = ConnectIQ.getInstance(this, ConnectIQ.IQConnectType.WIRELESS)
-        connectiq.initialize(this, true, connectListener())
+
+        CIQ = CIQ(this) {
+            // on message callback from watch
+
+            vm.addNewHR(it)
+        }
 
 
 
@@ -238,8 +248,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
     private fun updatePolyLines()
     {
-
-
         try
         {
             for(loc in vm.getLocationHistory().value!!)
@@ -247,19 +255,13 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
                 poly_op.add(LatLng(loc.lat, loc.long))
             }
 
-
-            doAsync {
-                uiThread {
-                    map.addPolyline(poly_op).jointType = JointType.ROUND
-                }
-
-            }
-            
         }
         catch(e : Exception)
         {
 
         }
+
+
     }
 
     private fun updateGeoFenceViews()
@@ -286,6 +288,8 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
         }
 
+
+
     }
 
     fun uiUpdaters() {
@@ -299,13 +303,13 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
             // update ui on triggers change
             vm.syncTriggers()
-            updateGeoFenceViews()
+            loadedTriggers = true
+
 
         })
 
         vm.getLocationHistory().observe(this, android.arch.lifecycle.Observer {
             vm.syncLocationStamps()
-            updatePolyLines()
         })
 
         // TODO observe location updates in firestore
@@ -333,7 +337,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
             // set timeout for progress bar
             loadingTimeout(5000)
-            transmit_string("sync")
+            CIQ.transmit("sync")
         }
 
         addTrigger.setOnClickListener {
@@ -373,43 +377,9 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    fun initializeAfterSDKReady() {
-        if (!checkDevices()) {
-            Log.i("ConnectIQ", "Couldn't find connected device.")
-            Toast.makeText(this, "NO DEVICE FOUND", Toast.LENGTH_SHORT)
-        } else {
-            Toast.makeText(this, "FOUND AVAILABLE DEVICE", Toast.LENGTH_LONG)
-        }
 
-        getAppInstance() // starts listener callback chain
-    }
 
-    fun getAppInstance() {
-        // app is initialized in callback appListener()
 
-        try{
-            connectiq.getApplicationInfo(getString(R.string.watch_appID), available, appListener())
-
-        }
-        catch (e : Exception)
-        {
-            // TODO watch not rdy to connect.
-        }
-    }
-
-    fun checkDevices(): Boolean {
-        paired = connectiq.knownDevices
-
-        if (paired.size > 0) {
-            for (device in paired) {
-                if (connectiq.getDeviceStatus(device) == IQDevice.IQDeviceStatus.CONNECTED) {
-                    available = device
-                    return true
-                }
-            }
-        }
-        return false
-    }
 
     @SuppressLint("MissingPermission")
     fun showTriggerCreationDialog() {
@@ -426,7 +396,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
     }
 
-    fun triggerFilter(sample: HashMap<Int, Int>) {}
 
     fun makeComponentsVisible() {
         sync_button.alpha = 0f
@@ -444,14 +413,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
         valueanimator.start()
     }
 
-    fun transmit_temporal(status: String) {
-        this.status = status
-        connectiq.sendMessage(available, app, status, sendMessageCallback())
-    }
 
-    fun transmit_string(status: String) {
-        connectiq.sendMessage(available, app, status, sendMessageCallback())
-    }
 
     // *********************
     // Handling App Behavior
@@ -459,7 +421,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onBackPressed() {
         try {
-            connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
+            CIQ.deRegister()
         } catch (e: UninitializedPropertyAccessException) {
         }
 
@@ -469,8 +431,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-
-
 
     }
 
@@ -487,7 +447,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         try {
-            connectiq.unregisterForApplicationEvents(available, app) //  de-register from watch
+            CIQ.deRegister()
         } catch (e: UninitializedPropertyAccessException) {
 
         } //  de-register from watch
@@ -545,10 +505,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
 
                     }
 
-
                     points.add(value)
-
-
 
                 }
 
@@ -594,87 +551,5 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
-
-    // *******************
-    // Listener Interfaces
-    // *******************
-
-    fun appEventListener(): ConnectIQ.IQApplicationEventListener =
-            object : ConnectIQ.IQApplicationEventListener {
-                override fun onMessageReceived(p0: IQDevice?, p1: IQApp?, p2: MutableList<Any>?, p3: ConnectIQ.IQMessageStatus?) {
-                    if (p3 == ConnectIQ.IQMessageStatus.SUCCESS) {
-                        try {
-                            val hash = p2!![0] as HashMap<Int, Int>
-                            vm.addNewHR(validateHash(hash))
-                        } catch (e: ClassCastException) {
-                            Log.i("from phone", "tether request from watch")
-                        }
-                    }
-                }
-            }
-
-    private fun validateHash(hash : HashMap<Int, Int>) : HashMap<Int, Int>
-    {
-        var toReturn = HashMap<Int, Int>()
-
-        for(k  in hash.keys)
-        {
-            try {
-                toReturn.put(k, hash.get(k)!!)
-            }
-            catch (e : NullPointerException)
-            {
-                Log.i("validating hash", "caught bad value")
-            }
-        }
-
-        return toReturn
-    }
-
-    fun sendMessageCallback(): ConnectIQ.IQSendMessageListener =
-            object : ConnectIQ.IQSendMessageListener {
-                override fun onMessageStatus(p0: IQDevice?, p1: IQApp?, p2: ConnectIQ.IQMessageStatus?) {
-                    print("hellow")
-                }
-            }
-
-    fun appListener(): ConnectIQ.IQApplicationInfoListener =
-            object : ConnectIQ.IQApplicationInfoListener {
-                override fun onApplicationInfoReceived(p0: IQApp?) {
-                    app = p0!! // getting app instance
-                    connectiq.registerForAppEvents(available, app, appEventListener())
-                    makeComponentsVisible()
-                }
-
-                override fun onApplicationNotInstalled(p0: String?) {
-                    //TODO("not implemented")
-                }
-            }
-
-    fun deviceListener(): ConnectIQ.IQDeviceEventListener =
-            object : ConnectIQ.IQDeviceEventListener {
-                override fun onDeviceStatusChanged(p0: IQDevice?, p1: IQDevice.IQDeviceStatus?) {
-                    // handle new device status
-                    // statuses -> CONNECTED, NOT_CONNECTED, NOT_PAIRED
-                }
-            }
-
-    fun connectListener(): ConnectIQ.ConnectIQListener =
-            object : ConnectIQ.ConnectIQListener {
-                override fun onInitializeError(p0: ConnectIQ.IQSdkErrorStatus?) {
-                    // A failure has occurred during initialization.  Inspect
-                    // the IQSdkErrorStatus value for more information regarding
-                    // the failure.
-                    toast("ERROR establishing connection")
-                }
-
-                override fun onSdkReady() {
-                    initializeAfterSDKReady()
-                }
-
-                override fun onSdkShutDown() {
-                    // TODO("not implemented")
-                }
-            }
+    
 }

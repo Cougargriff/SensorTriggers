@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.trigger_view.*
 import android.support.v7.widget.SimpleItemAnimator
 import com.google.android.gms.common.api.ResolvingResultCallbacks
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.Circle
 import com.google.common.io.Resources
@@ -95,10 +96,9 @@ class TriggerView : AppCompatActivity() {
 
 }
 
-class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
+class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnMapReadyCallback
 {
     private var context : Context? = null
-    private var mapFragment: SupportMapFragment? = null
     private var googleMap: GoogleMap? = null
     private var geoFence : Circle? = null
 
@@ -111,12 +111,22 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
     {
         val cell_view = LayoutInflater.from(parent.context).inflate(R.layout.trigger_cell, parent, false) as LinearLayout
+
+
         return ViewHolder(cell_view)
+    }
+
+
+    override fun onMapReady(p0: GoogleMap?) {
+
+        googleMap = p0!!
+
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
         val item = myDataset[position]
+
 
         when(item.hr_val)
         {
@@ -179,6 +189,7 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
             }
         }
 
+
         holder.itemView.hr_context_switch.setOnCheckedChangeListener { buttonView, isChecked ->
             when(isChecked)
             {
@@ -194,20 +205,22 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
         {
             View.GONE -> {
                 holder.itemView.sub_item.visibility = View.VISIBLE
-            }
-            View.VISIBLE -> {
                 when(item.type)
                 {
                     "h" -> {}
                     "g" -> {
-                        if(mapFragment == null)
+                        if(googleMap != null)
                         {
-                            mapFragment = SupportMapFragment.newInstance()
-
+                            googleMap = null
                         }
+                        holder.itemView.mapView.getMapAsync(this)
 
                     } // TODO add mapfrag to map_frame ...
                 }
+            }
+            View.VISIBLE -> {
+
+                holder.itemView.mapView.onDestroy()
 
                 holder.itemView.sub_item.visibility = View.GONE
             }

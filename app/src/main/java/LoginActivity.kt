@@ -123,7 +123,7 @@ class LoginActivity : AppCompatActivity()
         RevelyGradient
             .linear()
             .angle(90f)
-            .colors(intArrayOf(Color.parseColor("#4158D0"), Color.parseColor("#000000")))
+            .colors(intArrayOf(Color.GRAY, Color.parseColor("#000000")))
             .onBackgroundOf(view)
 
         val valueanimator = ValueAnimator.ofFloat(0f, 1f)

@@ -233,7 +233,11 @@ class ViewModel(val userRef : DocumentReference) : android.arch.lifecycle.ViewMo
 
         for(tSnap in data.documents)
         {
-            list.add(Trigger.fromSnap(tSnap))
+            var t = Trigger.fromSnap(tSnap)
+            if(t != null)
+            {
+                list.add(t)
+            }
         }
         return list
     }
