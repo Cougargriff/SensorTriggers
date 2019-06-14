@@ -285,13 +285,14 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
         CIQ = CIQ(this) {
             // on message callback from watch
 
+            // filter data in callback
             vm.addNewHR(it)
         }
 
 
 
     }
-    
+
     fun uiUpdaters() {
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {

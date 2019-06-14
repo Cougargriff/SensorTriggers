@@ -96,7 +96,7 @@ class TriggerView : AppCompatActivity() {
 
 }
 
-class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), OnMapReadyCallback
+class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>()
 {
     private var context : Context? = null
     private var googleMap: GoogleMap? = null
@@ -117,11 +117,11 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
     }
 
 
-    override fun onMapReady(p0: GoogleMap?) {
-
-        googleMap = p0!!
-
-    }
+//    override fun onMapReady(p0: GoogleMap?) {
+//
+//        googleMap = p0!!
+//
+//    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)
     {
@@ -209,18 +209,18 @@ class MyListAdapter(val myDataset: ArrayList<Trigger>, c : Context) : RecyclerVi
                 {
                     "h" -> {}
                     "g" -> {
-                        if(googleMap != null)
-                        {
-                            googleMap = null
-                        }
-                        holder.itemView.mapView.getMapAsync(this)
+//                        if(googleMap != null)
+//                        {
+//                            googleMap = null
+//                        }
+//                      //  holder.itemView.mapView.getMapAsync(this)
 
                     } // TODO add mapfrag to map_frame ...
                 }
             }
             View.VISIBLE -> {
 
-                holder.itemView.mapView.onDestroy()
+              //  holder.itemView.mapView.onDestroy()
 
                 holder.itemView.sub_item.visibility = View.GONE
             }
