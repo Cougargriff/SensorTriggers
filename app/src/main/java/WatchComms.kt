@@ -49,9 +49,9 @@ import java.lang.ClassCastException
 import java.lang.Exception
 import java.lang.NullPointerException
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.concurrent.timerTask
-import kotlin.coroutines.CoroutineContext
 
 
 class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
@@ -122,12 +122,15 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
                     } catch (e: Resources.NotFoundException) {
                     }
 
-                    updateGeoFenceViews()
-                    updatePolyLines()
+                    map.addPolyline(poly_op)
 
-
-
+                    for(c in circle_ops)
+                    {
+                        map.addCircle(c)
+                    }
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f))
+
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 30f))
 
 
                 }
@@ -135,9 +138,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
         }
 
     }
-
-
-
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -149,9 +149,59 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
         uiUpdaters()
         setButtonListeners()
 
+    }
+// TODO should migrate map overlay stuff to view model
 
+    private fun updatePolyLines()
+    {
+        try
+        {
+            poly_op = PolylineOptions()
+
+            for(loc in vm.getLocationHistory().value!!)
+            {
+                poly_op.add(LatLng(loc.lat, loc.long))
+            }
+
+
+
+
+
+
+        }
+        catch(e : Exception)
+        {
+
+        }
     }
 
+    private fun updateGeoFenceViews()
+    {
+        try
+        {
+            circle_ops = ArrayList<CircleOptions>()
+            for(t in vm.getTriggers().value!!)
+            {
+                if(t.type.compareTo("g") == 0)
+                {
+                    circle_ops.add(CircleOptions()
+                            .center(LatLng(t.lat, t.long))
+                            .clickable(true)
+                            .radius(100.0)
+                            .strokeColor(Color.BLUE)
+                            .strokeWidth(3f)
+                            .fillColor(ContextCompat.getColor(this, R.color.blueish).withAlpha(50)))
+                }
+            }
+
+
+        }
+        catch(e : Exception)
+        {
+
+        }
+
+    }
     fun startBackgroundService()
     {
         val intent = Intent(this.application, LocationTrackService::class.java)
@@ -244,10 +294,11 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
 
     }
 
-    // TODO should migrate map overlay stuff to view model
 
     private fun updatePolyLines()
     {
+
+
         try
         {
             for(loc in vm.getLocationHistory().value!!)
@@ -255,13 +306,19 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
                 poly_op.add(LatLng(loc.lat, loc.long))
             }
 
+
+            doAsync {
+                uiThread {
+                    map.addPolyline(poly_op).jointType = JointType.ROUND
+                }
+
+            }
+            
         }
         catch(e : Exception)
         {
 
         }
-
-
     }
 
     private fun updateGeoFenceViews()
@@ -288,8 +345,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
 
         }
 
-
-
     }
 
     fun uiUpdaters() {
@@ -303,7 +358,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
         vm.getTriggers().observe(this, android.arch.lifecycle.Observer {
             // update ui on triggers change
             vm.syncTriggers()
-            loadedTriggers = true
+            updateGeoFenceViews()
 
 
         })
