@@ -174,12 +174,10 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
 
         }
     }
-
     private fun updateGeoFenceViews()
     {
         try
         {
-            circle_ops = ArrayList<CircleOptions>()
             for(t in vm.getTriggers().value!!)
             {
                 if(t.type.compareTo("g") == 0)
@@ -194,7 +192,6 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
                 }
             }
 
-
         }
         catch(e : Exception)
         {
@@ -202,6 +199,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
         }
 
     }
+
     fun startBackgroundService()
     {
         val intent = Intent(this.application, LocationTrackService::class.java)
@@ -293,60 +291,7 @@ class WatchComms : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMapLoade
 
 
     }
-
-
-    private fun updatePolyLines()
-    {
-
-
-        try
-        {
-            for(loc in vm.getLocationHistory().value!!)
-            {
-                poly_op.add(LatLng(loc.lat, loc.long))
-            }
-
-
-            doAsync {
-                uiThread {
-                    map.addPolyline(poly_op).jointType = JointType.ROUND
-                }
-
-            }
-            
-        }
-        catch(e : Exception)
-        {
-
-        }
-    }
-
-    private fun updateGeoFenceViews()
-    {
-        try
-        {
-            for(t in vm.getTriggers().value!!)
-            {
-                if(t.type.compareTo("g") == 0)
-                {
-                    circle_ops.add(CircleOptions()
-                            .center(LatLng(t.lat, t.long))
-                            .clickable(true)
-                            .radius(100.0)
-                            .strokeColor(Color.BLUE)
-                            .strokeWidth(3f)
-                            .fillColor(ContextCompat.getColor(this, R.color.blueish).withAlpha(50)))
-                }
-            }
-
-        }
-        catch(e : Exception)
-        {
-
-        }
-
-    }
-
+    
     fun uiUpdaters() {
         // HR Data Updater
         vm.getHRData().observe(this, android.arch.lifecycle.Observer {
