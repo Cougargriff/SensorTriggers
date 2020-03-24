@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Documents-SensorTriggers.iml" filepath="$PROJECT_DIR$/Documents-SensorTriggers.iml" group="SensorTriggers" />
       <module fileurl="file://$PROJECT_DIR$/SensorTriggers.iml" filepath="$PROJECT_DIR$/SensorTriggers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/SensorTriggers-app.iml" filepath="$PROJECT_DIR$/app/SensorTriggers-app.iml" group="SensorTriggers/app" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
